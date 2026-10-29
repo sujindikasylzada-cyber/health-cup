@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="mono">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F8F8F7" />
+  <title>Sana — Wellness & Cycle ✨</title>
+
+  <!-- Применяем сохранённую тему ДО отрисовки, чтобы не было «вспышки» -->
+  <script>
+    try {
+      const saved = JSON.parse(localStorage.getItem('sana-prototype-v2') || '{}');
+      if (saved.theme) document.documentElement.dataset.theme = saved.theme;
+    } catch (e) { /* хранилище недоступно */ }
+  </script>
+
+  <!-- Шрифты (все с кириллицей): Manrope — интерфейс, Lora и Unbounded — заголовки разных тем -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    /* Все цвета Tailwind ссылаются на CSS-переменные активной темы.
+       Семантические токены:
+         page  — фон приложения      card  — карточки         soft — мягкая подложка
+         line  — границы             ink   — основной текст   muted — второстепенный текст
+         accent-* — основной акцент  prime-* — второй акцент   warm — тёплый акцент   */
+    const tv = (name) => `rgb(var(--${name}) / <alpha-value>)`;
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            page: tv('page'), card: tv('card'), soft: tv('soft'), line: tv('line'),
+            ink: tv('ink'), muted: tv('muted'), warm: tv('warm'),
+            accent: { 50: tv('a50'), 100: tv('a100'), 200: tv('a200'), 300: tv('a300'), 500: tv('a500'), 600: tv('a600'), 700: tv('a700') },
+            prime: { 500: tv('p500'), 600: tv('p600'), 700: tv('p700') }
+          },
+          fontFamily: {
+            display: ['var(--font-display)'],
+            sans: ['Manrope', 'system-ui', 'sans-serif']
+          },
+          boxShadow: {
+            glow: 'var(--card-shadow)',
+            lift: 'var(--lift-shadow)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* =====================================================================
+       ТЕМЫ ОФОРМЛЕНИЯ
+       Каждая тема — набор CSS-переменных. Цвета — тройки RGB (для прозрачности
+       в Tailwind: bg-card/80 и т.п.). Чтобы добавить тему — скопируй блок,
+       поменяй значения и добавь запись в массив THEMES в JS.
+       ===================================================================== */
+
+    /* 🖤 Minimal Black & White — тема по умолчанию */
+    :root, [data-theme="mono"] {
+      --page: 248 248 247; --card: 255 255 255; --soft: 240 240 238; --line: 224 224 221;
+      --ink: 14 14 14; --muted: 110 110 106; --warm: 64 64 64;
+      --a50: 246 246 245; --a100: 236 236 234; --a200: 214 214 211; --a300: 176 176 172;
+      --a500: 60 60 60; --a600: 17 17 17; --a700: 17 17 17;
+      --p500: 46 46 46; --p600: 17 17 17; --p700: 0 0 0;
+      --ph-menstrual: 17 17 17; --ph-follicular: 125 125 120; --ph-ovulatory: 178 178 172; --ph-luteal: 72 72 70;
+      --outer-bg: #E3E3E1;
+      --app-bg: rgb(248 248 247);
+      --hero-bg: linear-gradient(135deg, #0E0E0E 0%, #303030 100%);
+      --cta-bg: #111111;
+      --tile-bg: linear-gradient(135deg, #F3F3F1, #DCDCD8);
+      --card-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -14px rgba(0,0,0,.18);
+      --lift-shadow: 0 18px 40px -18px rgba(0,0,0,.45);
+      --font-display: 'Manrope', system-ui, sans-serif; --display-weight: 800; --display-track: -0.035em;
+      --title-bg: none; --stripe: none;
+      color-scheme: light;
+    }
+
+    /* 🌸 Soft Pink & White */
+    [data-theme="pink"] {
+      --page: 255 247 250; --card: 255 255 255; --soft: 253 236 243; --line: 247 214 228;
+      --ink: 61 32 48; --muted: 150 108 128; --warm: 226 104 96;
+      --a50: 255 242 247; --a100: 253 228 238; --a200: 250 204 223; --a300: 244 166 198;
+      --a500: 232 108 158; --a600: 214 76 134; --a700: 168 46 98;
+      --p500: 236 112 160; --p600: 214 76 134; --p700: 150 40 90;
+      --ph-menstrual: 214 66 106; --ph-follicular: 96 176 148; --ph-ovulatory: 236 156 76; --ph-luteal: 150 112 200;
+      --outer-bg: #F6DCE6;
+      --app-bg: rgb(255 247 250);
+      --hero-bg: linear-gradient(135deg, #F48FB8 0%, #D9467F 100%);
+      --cta-bg: linear-gradient(135deg, #E8679D, #C93774);
+      --tile-bg: linear-gradient(135deg, #FFF0F5, #F9C9DC);
+      --card-shadow: 0 1px 2px rgba(214,76,134,.05), 0 10px 26px -14px rgba(214,76,134,.28);
+      --lift-shadow: 0 18px 40px -18px rgba(214,76,134,.55);
+      --font-display: 'Lora', Georgia, serif; --display-weight: 600; --display-track: 0;
+      --title-bg: none; --stripe: none;
+      color-scheme: light;
+    }
+
+    /* 🌺 Dark Pink & Black — Neo-Glow */
+    [data-theme="neo"] {
+      --page: 11 8 13; --card: 25 18 28; --soft: 38 28 41; --line: 62 45 64;
+      --ink: 250 236 245; --muted: 178 150 170; --warm: 255 128 160;
+      --a50: 34 18 30; --a100: 60 22 47; --a200: 110 36 80; --a300: 180 58 128;
+      --a500: 255 64 152; --a600: 255 61 152; --a700: 255 150 205;
+      --p500: 255 64 152; --p600: 232 32 132; --p700: 255 132 196;
+      --ph-menstrual: 255 70 120; --ph-follicular: 84 228 188; --ph-ovulatory: 255 206 92; --ph-luteal: 182 122 255;
+      --outer-bg: #050306;
+      --app-bg: radial-gradient(120% 50% at 100% 0%, rgba(255,64,152,.20), transparent 60%), radial-gradient(90% 40% at 0% 100%, rgba(138,43,226,.18), transparent 60%), rgb(11 8 13);
+      --hero-bg: linear-gradient(135deg, #FF3D98 0%, #8A2BE2 100%);
+      --cta-bg: linear-gradient(135deg, #FF3D98, #CF1474);
+      --tile-bg: linear-gradient(135deg, #2C1532, #4C1A3E);
+      --card-shadow: 0 0 0 1px rgba(255,64,152,.15), 0 12px 30px -14px rgba(255,64,152,.35);
+      --lift-shadow: 0 0 32px -6px rgba(255,61,152,.6);
+      --font-display: 'Unbounded', 'Manrope', sans-serif; --display-weight: 600; --display-track: -0.01em;
+      --title-bg: linear-gradient(90deg, #FF8AC6, #FF3D98, #B66BFF);
+      --stripe: linear-gradient(90deg, #FF3D98, #B66BFF);
+      color-scheme: dark;
+    }
+
+    /* 🌈 Soft Gradient — пастельные переливы */
+    [data-theme="gradient"] {
+      --page: 250 248 255; --card: 255 255 255; --soft: 243 240 252; --line: 228 222 246;
+      --ink: 44 38 72; --muted: 120 112 150; --warm: 236 132 104;
+      --a50: 246 243 255; --a100: 235 230 255; --a200: 216 206 252; --a300: 188 174 246;
+      --a500: 142 122 232; --a600: 122 100 222; --a700: 88 64 184;
+      --p500: 232 136 190; --p600: 214 104 168; --p700: 160 64 124;
+      --ph-menstrual: 236 110 140; --ph-follicular: 90 190 160; --ph-ovulatory: 242 174 84; --ph-luteal: 136 116 228;
+      --outer-bg: linear-gradient(160deg, #FCE4F1, #E6ECFF 55%, #E3FAF2);
+      --app-bg: linear-gradient(180deg, #FDF0F8 0%, #F1F0FF 45%, #ECFAF5 100%);
+      --hero-bg: linear-gradient(135deg, #8F7CF0 0%, #E68AC4 100%);
+      --cta-bg: linear-gradient(135deg, #8E7CF0, #D27AB4);
+      --tile-bg: linear-gradient(135deg, #FDE7F3, #E3E5FF);
+      --card-shadow: 0 1px 2px rgba(122,100,222,.05), 0 10px 28px -14px rgba(122,100,222,.30);
+      --lift-shadow: 0 18px 40px -18px rgba(142,122,232,.6);
+      --font-display: 'Lora', Georgia, serif; --display-weight: 600; --display-track: 0;
+      --title-bg: none; --stripe: none;
+      color-scheme: light;
+    }
+
+    /* 🦄 Rainbow / Cyber Pop */
+    [data-theme="rainbow"] {
+      --page: 255 252 244; --card: 255 255 255; --soft: 244 240 255; --line: 226 218 250;
+      --ink: 22 16 44; --muted: 108 98 140; --warm: 255 120 0;
+      --a50: 236 251 255; --a100: 212 245 255; --a200: 160 232 255; --a300: 96 214 255;
+      --a500: 124 77 255; --a600: 110 56 255; --a700: 84 30 210;
+      --p500: 255 60 172; --p600: 240 40 150; --p700: 190 20 120;
+      --ph-menstrual: 255 59 92; --ph-follicular: 0 190 136; --ph-ovulatory: 255 176 0; --ph-luteal: 124 77 255;
+      --outer-bg: linear-gradient(135deg, #FFD6E8, #FFF3C4, #C9F7E4, #CFE3FF, #E7D4FF);
+      --app-bg: linear-gradient(180deg, #FFFDF5, #F7F5FF);
+      --hero-bg: linear-gradient(120deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+      --cta-bg: linear-gradient(90deg, #FF3C78, #FF7A00, #00A877, #2F7BFF, #9B4DFF);
+      --tile-bg: linear-gradient(135deg, #FFE1F0, #FFF6CC, #E1F3FF);
+      --card-shadow: 0 1px 2px rgba(110,56,255,.06), 0 10px 26px -14px rgba(110,56,255,.32);
+      --lift-shadow: 0 18px 40px -16px rgba(255,60,172,.55);
+      --font-display: 'Unbounded', 'Manrope', sans-serif; --display-weight: 700; --display-track: -0.015em;
+      --title-bg: linear-gradient(90deg, #FF3C78, #FF7A00, #00A877, #2F7BFF, #9B4DFF);
+      --stripe: linear-gradient(90deg, #FF3C78, #FF7A00, #FFD000, #00A877, #2F7BFF, #9B4DFF);
+      color-scheme: light;
+    }
+
+    /* ---------- Базовые стили, завязанные на тему ---------- */
+    html, body { -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Manrope', system-ui, sans-serif; background: var(--outer-bg); background-attachment: fixed; color: rgb(var(--ink)); }
+    .app-surface { background: var(--app-bg); }
+    .hero { background: var(--hero-bg); color: #fff; }
+    .cta  { background: var(--cta-bg);  color: #fff; }
+    .tile { background: var(--tile-bg); }
+    html .font-display { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-track); }
+    /* Градиентные заголовки в ярких темах */
+    [data-theme="neo"] .page-title, [data-theme="rainbow"] .page-title {
+      background: var(--title-bg); -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    /* Unbounded шире остальных шрифтов — чуть уменьшаем крупные заголовки */
+    [data-theme="neo"] h1.page-title, [data-theme="rainbow"] h1.page-title { font-size: 23px; }
+    /* Цветная полоска сверху (Neo и Rainbow) */
+    .top-stripe { height: 4px; background: var(--stripe); }
+    /* Плавная смена темы */
+    html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+      transition: background-color .45s ease, color .45s ease, border-color .45s ease, box-shadow .45s ease !important;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+    button { -webkit-user-select: none; user-select: none; }
+    button:active { transform: scale(.97); }
+    button, a { transition: transform .15s ease, background-color .2s ease, color .2s ease, opacity .2s ease, box-shadow .2s ease; }
+    .emoji { font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; line-height: 1; }
+
+    /* ---------- Микро-анимации ---------- */
+    .fade-in { animation: fadeIn .38s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .stagger > * { animation: fadeIn .45s cubic-bezier(.2,.8,.2,1) both; }
+    .stagger > *:nth-child(2) { animation-delay: .04s } .stagger > *:nth-child(3) { animation-delay: .08s }
+    .stagger > *:nth-child(4) { animation-delay: .12s } .stagger > *:nth-child(5) { animation-delay: .16s }
+    .stagger > *:nth-child(6) { animation-delay: .2s }  .stagger > *:nth-child(n+7) { animation-delay: .24s }
+
+    .pop { animation: pop .35s ease; }
+    @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.35)} 100%{transform:scale(1)} }
+    .float { animation: float 3.4s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
+    .breathe { animation: breathe 4s ease-in-out infinite; }
+    @keyframes breathe { 0%,100%{ transform: scale(1); opacity:.55 } 50%{ transform: scale(1.08); opacity:.95 } }
+    .spin { display: inline-block; animation: spin 1.1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Блик на премиум-кнопках */
+    .shine { position: relative; overflow: hidden; }
+    .shine::after { content:''; position:absolute; inset:0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.3) 50%, transparent 70%); transform: translateX(-100%); animation: shine 3.2s ease-in-out infinite; pointer-events: none; }
+    @keyframes shine { 60%,100% { transform: translateX(100%); } }
+
+    /* Линия AI-сканера */
+    .scan-line { position:absolute; left:0; right:0; height: 3px; background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 18px 4px rgba(255,255,255,.8); animation: scan 1.6s ease-in-out infinite; }
+    @keyframes scan { 0% { top: 4%; } 50% { top: 94%; } 100% { top: 4%; } }
+    .scan-grid { background-image: linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px); background-size: 22px 22px; }
+
+    /* Нижний лист (bottom sheet) */
+    #sheet .backdrop { opacity: 0; transition: opacity .28s ease; }
+    #sheet.open .backdrop { opacity: 1; }
+    #sheet .panel { transform: translateY(100%); transition: transform .34s cubic-bezier(.2,.8,.2,1); }
+    #sheet.open .panel { transform: translateY(0); }
+
+    /* Тост */
+    #toast { transition: opacity .25s ease, transform .25s ease; }
+
+    /* Конфетти */
+    .confetti { position: fixed; top: -12px; width: 8px; height: 12px; border-radius: 2px; z-index: 80; pointer-events: none; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: .8; } }
+
+    .gift-glow { animation: glow 2.4s ease-in-out infinite; }
+    @keyframes glow { 0%,100% { box-shadow: 0 0 0 0 rgb(var(--warm) / .4); } 50% { box-shadow: 0 0 0 8px rgb(var(--warm) / 0); } }
+
+    input[type=range] { accent-color: rgb(var(--a600)); }
+    input[type=date]  { color-scheme: inherit; }
+    .blur-code { filter: blur(5px); }
+    .ob-fill { transition: width .5s cubic-bezier(.2,.8,.2,1); }
+  </style>
+</head>
+
+<body class="antialiased">
+  <!-- Мобильный контейнер приложения -->
+  <div id="app" class="app-surface relative mx-auto min-h-screen w-full max-w-[440px] pb-28 shadow-2xl shadow-black/10">
+    <div class="top-stripe"></div>
+    <main id="view" class="px-4 pt-5"></main>
+
+    <!-- ===== Нижняя навигация ===== -->
+    <nav id="bottom-nav" class="fixed bottom-0 left-1/2 z-40 w-full max-w-[440px] -translate-x-1/2 border-t border-line/70 bg-page/85 px-3 pb-[max(env(safe-area-inset-bottom),10px)] pt-2 backdrop-blur-xl">
+      <div class="grid grid-cols-4 gap-1">
+        <button data-action="nav" data-tab="diary" class="nav-btn"><span class="emoji nav-emoji">📖</span><span>Дневник</span></button>
+        <button data-action="nav" data-tab="community" class="nav-btn"><span class="emoji nav-emoji">💬</span><span>Сообщество</span></button>
+        <button data-action="nav" data-tab="partners" class="nav-btn"><span class="emoji nav-emoji">🛍️</span><span>Партнёры</span></button>
+        <button data-action="nav" data-tab="profile" class="nav-btn"><span class="emoji nav-emoji">🙋‍♀️</span><span>Профиль</span></button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ===== Нижний лист (модальные окна) ===== -->
+  <div id="sheet" class="fixed inset-0 z-50 hidden">
+    <div class="backdrop absolute inset-0 bg-black/45 backdrop-blur-[2px]" data-action="closeSheet"></div>
+    <!-- Центрируем через inset-x-0 + mx-auto: transform занят анимацией выезда -->
+    <div class="panel absolute inset-x-0 bottom-0 mx-auto w-full max-w-[440px]">
+      <div class="app-surface max-h-[90vh] overflow-y-auto rounded-t-[28px] px-5 pb-8 pt-3 no-scrollbar">
+        <div class="mx-auto mb-4 h-1.5 w-10 rounded-full bg-line"></div>
+        <div id="sheet-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Тост-уведомление ===== -->
+  <div id="toast" class="pointer-events-none fixed left-1/2 top-4 z-[90] opacity-0" style="transform: translate(-50%, -12px)">
+    <div id="toast-text" class="whitespace-nowrap rounded-full bg-ink px-4 py-2.5 text-sm font-bold text-page shadow-lift"></div>
+  </div>
+
+<script>
+/* =====================================================================
+   SANA — прототип FemTech-приложения (v2)
+   Архитектура:
+   1. Справочные данные (темы, фазы, цели, ограничения, продукты, форум, партнёры)
+   2. Состояние (state — сохраняется в localStorage, ui — временное)
+   3. Хелперы (даты, форматирование, тосты, лист, конфетти, темы)
+   4. Бизнес-логика (цикл по дате, нормы, ограничения, XP-уровни, AI-советы)
+   5. Онбординг (опросник первого входа)
+   6. Рендер вкладок
+   7. Рендер нижних листов (модалки)
+   8. Обработчики действий (делегирование через data-action)
+   ===================================================================== */
+
+
+/* =========================== 1. ДАННЫЕ ============================ */
+
+/** Темы оформления (переменные — в <style>, здесь — подписи и превью) */
+const THEMES = [
+  { id: 'mono',     e: '🖤', name: 'Minimal Black & White', sub: 'Чистый минимализм · по умолчанию', meta: '#F8F8F7' },
+  { id: 'pink',     e: '🌸', name: 'Soft Pink & White',     sub: 'Нежная, светлая, воздушная',      meta: '#FFF7FA' },
+  { id: 'neo',      e: '🌺', name: 'Dark Pink & Black',     sub: 'Neo-Glow · тёмная тема',           meta: '#0B080D' },
+  { id: 'gradient', e: '🌈', name: 'Soft Gradient',         sub: 'Пастельные переливы',              meta: '#FDF0F8' },
+  { id: 'rainbow',  e: '🦄', name: 'Rainbow / Cyber Pop',   sub: 'Ярко, смело, радужно',             meta: '#FFFCF4' }
+];
+
+/** Фазы цикла: калорийная поправка, фокус на микроэлементы, советы */
+const PHASES = {
+  menstrual: {
+    name: 'Менструальная', short: 'Менстр.', adj: 'менструальной', e: '🩸', kcal: 200, water: 10,
+    focus: ['Железо', 'Магний', 'Гидратация'],
+    desc: 'Энергии меньше — телу нужны ресурс, тепло и бережность 🫶',
+    addons: 'гречку 🥣, чечевицу 🫘 или шпинат 🥬 с каплей лимона 🍋',
+    extra: 'Добавь источник витамина C 🍓 — так железо усвоится лучше.',
+    tips: [
+      'Сегодня организм тратит больше энергии 🔋 Скушай клубнику 🍓 или тёмный шоколад 🍫 — это поднимет дофамин и магний. Ты молодец! 🤍',
+      'Железо сейчас уходит быстрее обычного 🩸 Гречка, чечевица или шпинат с лимоном 🍋 вернут силы. Береги себя ✨',
+      'Тёплый чай с имбирём 🫖 и мягкая растяжка 🧘‍♀️ вместо интенсивной тренировки — это тоже забота о теле, а не лень 🕊️'
+    ]
+  },
+  follicular: {
+    name: 'Фолликулярная', short: 'Фоллик.', adj: 'фолликулярной', e: '🌱', kcal: 0, water: 8,
+    focus: ['Белок', 'Клетчатка', 'Витамины B'],
+    desc: 'Эстроген растёт — энергии и мотивации всё больше 🚀',
+    addons: 'источник белка: яйца 🥚, творог 🧀 или курицу 🍗',
+    extra: 'Хорошее время для силовой тренировки 💪 — мышцы быстро восстанавливаются.',
+    tips: [
+      'Эстроген растёт, а с ним — энергия и настроение 🌱 Отличный день, чтобы попробовать новую тренировку 🏋️‍♀️ или рецепт 🥗!',
+      'Тело сейчас отлично усваивает углеводы 🍠 Овсянка 🥣, киноа и ягоды 🫐 дадут ровную энергию на весь день.',
+      'Добавь белок в каждый приём пищи 🥚 — мышцы скажут спасибо после активного дня. Ты на верном пути ✨'
+    ]
+  },
+  ovulatory: {
+    name: 'Овуляторная', short: 'Овуляц.', adj: 'овуляторной', e: '🌸', kcal: 100, water: 9,
+    focus: ['Цинк', 'Антиоксиданты', 'Омега-3'],
+    desc: 'Пик энергии, уверенности и общительности 💃',
+    addons: 'тыквенные семечки 🎃, лосось 🐟 или яркие овощи 🥕',
+    extra: 'Температура тела чуть выше 🌡️ — не забывай про воду 💧',
+    tips: [
+      'Ты на пике энергии 🌸 — самое время для важных встреч 💼 Тыквенные семечки 🎃 и лосось 🐟 поддержат цинк и омега-3.',
+      'Разноцветные овощи на тарелке = антиоксиданты 🥕🫑🥦 Чем ярче салат, тем лучше 🌈',
+      'Температура тела сейчас немного выше 🌡️ Стакан воды прямо сейчас 💧 — маленький подарок себе 🎁'
+    ]
+  },
+  luteal: {
+    name: 'Лютеиновая', short: 'Лютеин.', adj: 'лютеиновой', e: '🌙', kcal: 250, water: 9,
+    focus: ['Магний', 'Витамин B6', 'Сложные углеводы'],
+    desc: 'Метаболизм ускоряется, тянет на сладкое — это нормально 🍫',
+    addons: 'банан 🍌, горсть миндаля 🌰, батат 🍠 или кусочек тёмного шоколада 🍫',
+    extra: 'Магний и B6 помогают мягче пережить ПМС 🌙',
+    tips: [
+      'Тяга к сладкому сейчас — это физиология, а не слабость 🍫 Банан 🍌 с горстью миндаля 🌰 даст магний и B6 и успокоит нервы.',
+      'Метаболизм ускорился 🔥 — организму правда нужно чуть больше еды. Батат 🍠, гречка и киноа — твои союзники.',
+      'Если накатывает раздражительность — это гормоны, а не ты 🌙 Прогулка 🚶‍♀️, тёплый душ 🛁 и сон 😴 творят чудеса.'
+    ]
+  }
+};
+const PHASE_ORDER = ['menstrual', 'follicular', 'ovulatory', 'luteal'];
+
+/** Эмодзи для микроэлементов */
+const MICRO_E = {
+  'Железо': '🧲', 'Магний': '🍫', 'Гидратация': '💧', 'Белок': '🥚', 'Клетчатка': '🌾', 'Витамины B': '⚡',
+  'Цинк': '🎃', 'Антиоксиданты': '🫐', 'Омега-3': '🐟', 'Витамин B6': '🍌', 'Сложные углеводы': '🍠'
+};
+
+/** Цели онбординга */
+const GOALS = [
+  { id: 'lose',     e: '⚖️', name: 'Сбросить вес',            sub: 'Мягкий дефицит без жёстких диет' },
+  { id: 'maintain', e: '💪', name: 'Поддерживать форму',      sub: 'Баланс энергии и тонус' },
+  { id: 'pms',      e: '🌙', name: 'Мягче проходить ПМС',     sub: 'Магний, B6 и бережные советы' },
+  { id: 'track',    e: '📅', name: 'Отслеживать цикл',        sub: 'Прогноз фаз и месячных' }
+];
+
+/** Пищевые ограничения: какие метки продуктов исключаются */
+const RESTRICTIONS = [
+  { id: 'lactose',    e: '🥛', name: 'Лактоза',        excl: ['dairy'] },
+  { id: 'gluten',     e: '🌾', name: 'Глютен',         excl: ['gluten'] },
+  { id: 'nuts',       e: '🥜', name: 'Орехи',          excl: ['nuts'] },
+  { id: 'seafood',    e: '🦐', name: 'Морепродукты',   excl: ['seafood'] },
+  { id: 'vegetarian', e: '🥗', name: 'Вегетарианство', excl: ['meat', 'seafood'] },
+  { id: 'halal',      e: '☪️', name: 'Халяль-питание', excl: ['pork', 'alcohol'] }
+];
+
+/** Уровень активности → базовая норма калорий */
+const ACTIVITY = [
+  { id: 'sedentary', e: '🛋️', name: 'Сидячий образ жизни', sub: 'Офис, учёба, мало шагов',            base: 1700 },
+  { id: 'moderate',  e: '🚶‍♀️', name: 'Умеренный',          sub: 'Прогулки и 2–3 тренировки в неделю', base: 1900 },
+  { id: 'active',    e: '🏃‍♀️', name: 'Активный',           sub: 'Спорт 4+ раз в неделю',              base: 2200 }
+];
+
+/** База продуктов (на 100 г). has — метки для фильтра ограничений */
+const FOOD_DB = [
+  { id: 1,  e: '🥣', name: 'Гречка отварная',          kcal: 110, p: 4.2, f: 1.1, c: 21.3, micro: ['Железо', 'Магний', 'Сложные углеводы', 'Клетчатка'], has: [] },
+  { id: 2,  e: '🥣', name: 'Овсянка на воде',          kcal: 88,  p: 3,   f: 1.7, c: 15,   micro: ['Сложные углеводы', 'Клетчатка', 'Магний'], has: [] },
+  { id: 3,  e: '🍗', name: 'Куриная грудка запечённая',kcal: 165, p: 31,  f: 3.6, c: 0,    micro: ['Белок', 'Витамин B6'], has: ['meat'] },
+  { id: 4,  e: '🐟', name: 'Лосось запечённый',        kcal: 208, p: 20,  f: 13,  c: 0,    micro: ['Омега-3', 'Белок', 'Витамины B'], has: ['seafood'] },
+  { id: 5,  e: '🥩', name: 'Говядина тушёная',         kcal: 232, p: 25,  f: 15,  c: 0,    micro: ['Железо', 'Цинк', 'Белок'], has: ['meat'] },
+  { id: 6,  e: '🥚', name: 'Яйцо варёное',             kcal: 155, p: 13,  f: 11,  c: 1.1,  micro: ['Белок', 'Витамины B'], has: [] },
+  { id: 7,  e: '🧀', name: 'Творог 5%',                kcal: 121, p: 17,  f: 5,   c: 1.8,  micro: ['Белок'], has: ['dairy'] },
+  { id: 8,  e: '🥛', name: 'Греческий йогурт',         kcal: 66,  p: 10,  f: 0.4, c: 4,    micro: ['Белок'], has: ['dairy'] },
+  { id: 9,  e: '🥬', name: 'Шпинат',                   kcal: 23,  p: 2.9, f: 0.4, c: 3.6,  micro: ['Железо', 'Магний', 'Антиоксиданты'], has: [] },
+  { id: 10, e: '🫘', name: 'Чечевица отварная',        kcal: 116, p: 9,   f: 0.4, c: 20,   micro: ['Железо', 'Клетчатка', 'Сложные углеводы'], has: [] },
+  { id: 11, e: '🥑', name: 'Авокадо',                  kcal: 160, p: 2,   f: 15,  c: 9,    micro: ['Магний', 'Витамин B6', 'Клетчатка'], has: [] },
+  { id: 12, e: '🍌', name: 'Банан',                    kcal: 89,  p: 1.1, f: 0.3, c: 23,   micro: ['Витамин B6', 'Магний'], has: [] },
+  { id: 13, e: '🍓', name: 'Клубника',                 kcal: 32,  p: 0.7, f: 0.3, c: 7.7,  micro: ['Антиоксиданты'], has: [] },
+  { id: 14, e: '🍫', name: 'Тёмный шоколад 70%',       kcal: 598, p: 7.8, f: 43,  c: 46,   micro: ['Магний', 'Железо', 'Антиоксиданты'], has: [] },
+  { id: 15, e: '🌰', name: 'Миндаль',                  kcal: 579, p: 21,  f: 50,  c: 22,   micro: ['Магний'], has: ['nuts'] },
+  { id: 16, e: '🎃', name: 'Тыквенные семечки',        kcal: 559, p: 30,  f: 49,  c: 11,   micro: ['Цинк', 'Магний', 'Железо'], has: [] },
+  { id: 17, e: '🍚', name: 'Киноа отварная',           kcal: 120, p: 4.4, f: 1.9, c: 21,   micro: ['Сложные углеводы', 'Магний', 'Клетчатка'], has: [] },
+  { id: 18, e: '🍠', name: 'Батат запечённый',         kcal: 90,  p: 2,   f: 0.2, c: 21,   micro: ['Сложные углеводы', 'Витамин B6', 'Антиоксиданты'], has: [] },
+  { id: 19, e: '🍛', name: 'Плов с говядиной',         kcal: 190, p: 7,   f: 9,   c: 20,   micro: ['Белок'], has: ['meat'] },
+  { id: 20, e: '🍲', name: 'Бешбармак',                kcal: 210, p: 13,  f: 10,  c: 17,   micro: ['Белок', 'Железо'], has: ['meat', 'gluten'] },
+  { id: 21, e: '🥛', name: 'Кефир 1%',                 kcal: 40,  p: 3,   f: 1,   c: 4,    micro: ['Витамины B'], has: ['dairy'] },
+  { id: 22, e: '🥒', name: 'Огурец',                   kcal: 15,  p: 0.7, f: 0.1, c: 3.6,  micro: ['Гидратация'], has: [] },
+  { id: 23, e: '🍉', name: 'Арбуз',                    kcal: 30,  p: 0.6, f: 0.2, c: 7.6,  micro: ['Гидратация', 'Антиоксиданты'], has: [] },
+  { id: 24, e: '🫐', name: 'Черника',                  kcal: 57,  p: 0.7, f: 0.3, c: 14.5, micro: ['Антиоксиданты'], has: [] },
+  { id: 25, e: '🥐', name: 'Круассан',                 kcal: 406, p: 8,   f: 21,  c: 45,   micro: ['Витамины B'], has: ['gluten', 'dairy'] },
+  { id: 26, e: '🍞', name: 'Цельнозерновой хлеб',      kcal: 247, p: 13,  f: 3.4, c: 41,   micro: ['Клетчатка', 'Сложные углеводы', 'Витамины B'], has: ['gluten'] },
+  { id: 27, e: '🦐', name: 'Креветки',                 kcal: 99,  p: 24,  f: 0.3, c: 0.2,  micro: ['Белок', 'Цинк', 'Омега-3'], has: ['seafood'] },
+  { id: 28, e: '🥜', name: 'Арахисовая паста',         kcal: 588, p: 25,  f: 50,  c: 20,   micro: ['Магний', 'Белок'], has: ['nuts'] },
+  { id: 29, e: '🧆', name: 'Хумус',                    kcal: 166, p: 8,   f: 9.6, c: 14,   micro: ['Железо', 'Клетчатка', 'Белок'], has: [] }
+];
+
+/** Блюда, которые «распознаёт» AI-сканер (симуляция) */
+const SCAN_DISHES = [
+  { id: 'bowl',  e: '🥗', name: 'Боул с лососем и киноа',        grams: 320, kcal: 520, p: 32, f: 22, c: 46, micro: ['Омега-3', 'Белок', 'Магний', 'Сложные углеводы'], has: ['seafood'] },
+  { id: 'buck',  e: '🍲', name: 'Гречка с говядиной и шпинатом', grams: 350, kcal: 480, p: 34, f: 16, c: 48, micro: ['Железо', 'Цинк', 'Магний', 'Белок'], has: ['meat'] },
+  { id: 'oats',  e: '🥣', name: 'Овсянка с ягодами и миндалём',  grams: 280, kcal: 390, p: 12, f: 14, c: 54, micro: ['Клетчатка', 'Антиоксиданты', 'Магний', 'Сложные углеводы'], has: ['nuts'] },
+  { id: 'syrn',  e: '🥞', name: 'Сырники со сметаной',           grams: 220, kcal: 450, p: 24, f: 20, c: 42, micro: ['Белок', 'Витамины B'], has: ['dairy', 'gluten'] },
+  { id: 'avo',   e: '🥑', name: 'Тост с авокадо и яйцом',        grams: 210, kcal: 410, p: 17, f: 24, c: 32, micro: ['Магний', 'Витамин B6', 'Белок', 'Клетчатка'], has: ['gluten'] },
+  { id: 'choco', e: '🍓', name: 'Клубника с тёмным шоколадом',   grams: 150, kcal: 210, p: 3,  f: 13, c: 22, micro: ['Антиоксиданты', 'Магний', 'Железо'], has: [] }
+];
+
+/** Уровни геймификации форума */
+const LEVELS = [
+  { lvl: 1, e: '🌱', name: 'Новенькая',           xp: 0 },
+  { lvl: 2, e: '🔍', name: 'Любопытная',          xp: 100 },
+  { lvl: 3, e: '🤝', name: 'Отзывчивая',          xp: 200 },
+  { lvl: 4, e: '💞', name: 'Заботливая подруга',  xp: 300 },
+  { lvl: 5, e: '🦉', name: 'Мудрая наставница',   xp: 450 },
+  { lvl: 6, e: '👑', name: 'Хранительница круга', xp: 650 }
+];
+
+const FORUM_TAGS = ['Все', 'Уход', 'Здоровье', 'ПМС', 'Гигиена'];
+const TAG_E = { 'Все': '✨', 'Уход': '💅', 'Здоровье': '🩺', 'ПМС': '🌙', 'Гигиена': '🧼' };
+const TAG_STYLE = {
+  'Уход':     'bg-prime-500/15 text-prime-700',
+  'Здоровье': 'bg-accent-100 text-accent-700',
+  'ПМС':      'bg-warm/15 text-warm',
+  'Гигиена':  'bg-soft text-ink'
+};
+
+/** Стартовые вопросы форума */
+const SEED_QUESTIONS = [
+  {
+    id: 'q1', tag: 'Уход', time: '2 ч назад', authorLvl: 2, likes: 46, liked: false,
+    text: 'Что делать, если от бритья сильное раздражение? 😣 Пробовала разные станки — всё равно красные точки.',
+    answers: [
+      { id: 'a1', lvl: 4, text: 'Мне помогает шугаринг 🍯 — раздражения почти нет, а волоски со временем становятся тоньше.', likes: 24, liked: false, time: '1 ч' },
+      { id: 'a2', lvl: 3, text: 'Предпочитаю вообще не бриться — и это тоже абсолютно нормально 💛', likes: 31, liked: false, time: '58 мин' },
+      { id: 'a3', lvl: 5, text: 'Новое лезвие каждые 5–7 раз 🪒, бриться по росту волос после тёплого душа 🚿, потом гель с алоэ 🌿. И никакого спиртового лосьона!', likes: 18, liked: false, time: '40 мин' }
+    ]
+  },
+  {
+    id: 'q2', tag: 'ПМС', time: '5 ч назад', authorLvl: 1, likes: 63, liked: false,
+    text: 'Как вы справляетесь с дикой тягой к сладкому за неделю до месячных? 🍰',
+    answers: [
+      { id: 'a4', lvl: 4, text: 'Держу дома тёмный шоколад 70% 🍫 и финики. Пара долек — и не срываюсь на торт.', likes: 40, liked: false, time: '4 ч' },
+      { id: 'a5', lvl: 2, text: 'Перестала себя ругать — стало легче 🕊️ Ем нормально в течение дня, тогда вечером не так тянет.', likes: 22, liked: false, time: '3 ч' }
+    ]
+  },
+  {
+    id: 'q3', tag: 'Здоровье', time: 'вчера', authorLvl: 3, likes: 28, liked: false,
+    text: 'Нормально ли, что цикл сбивается после перелётов и смены часовых поясов? ✈️',
+    answers: [
+      { id: 'a6', lvl: 5, text: 'Стресс и недосып часто сдвигают цикл на несколько дней. Если сбой повторяется 2–3 цикла подряд — стоит показаться гинекологу 🩺', likes: 35, liked: false, time: '20 ч' }
+    ]
+  },
+  {
+    id: 'q4', tag: 'Гигиена', time: '2 дня назад', authorLvl: 2, likes: 19, liked: false,
+    text: 'Менструальная чаша или диск — что удобнее для новичка? 🤔',
+    answers: [
+      { id: 'a7', lvl: 3, text: 'Начинала с диска — его проще установить. Чашу освоила позже, но она надёжнее при спорте 🏃‍♀️', likes: 12, liked: false, time: '1 д' },
+      { id: 'a8', lvl: 4, text: 'Чаша, но обязательно подобрать размер по высоте шейки — это решает всё ✅', likes: 9, liked: false, time: '1 д' }
+    ]
+  }
+];
+
+/** Гео-группы */
+const CITIES = [['Все', '🌍'], ['Астана', '🏙️'], ['Алматы', '🏔️'], ['Шымкент', '🌇'], ['Онлайн', '💻']];
+const SEED_GROUPS = [
+  { id: 'g1', name: 'Кошечки Алматы', city: 'Алматы', e: '🐈', members: 1284, joined: false,
+    desc: 'Бранчи 🥐, прогулки в горах 🏔️ и взаимопомощь по-соседски.',
+    people: ['Асель', 'Мадина', 'Жанна', 'Карина', 'Алия', 'Дана'],
+    chat: [
+      { who: 'Асель', text: 'Девочки, в субботу бранч в 11:00 на Абая, кто с нами? ☕🥐', t: '10:24' },
+      { who: 'Мадина', text: 'Я! Возьму с собой подругу, она недавно переехала 🙌', t: '10:31' },
+      { who: 'Жанна', text: 'А в воскресенье можно на Кок-Жайляу, погода обещает быть хорошей ☀️', t: '11:02' }
+    ] },
+  { id: 'g2', name: 'Мамочки Астаны', city: 'Астана', e: '👶', members: 2310, joined: false,
+    desc: 'Педиатры 🩺, кружки 🎨, обмен вещами и поддержка в декрете 🤍',
+    people: ['Айгуль', 'Сауле', 'Камила', 'Индира', 'Лаура'],
+    chat: [
+      { who: 'Айгуль', text: 'Посоветуйте спокойного педиатра в Есильском районе? 🙏', t: '09:12' },
+      { who: 'Сауле', text: 'Нам очень понравилась врач в клинике «Ана», напишу в личку 🤍', t: '09:20' }
+    ] },
+  { id: 'g3', name: 'Бег и Yoga', city: 'Астана', e: '🧘‍♀️', members: 864, joined: false,
+    desc: 'Утренние пробежки по набережной 🏃‍♀️ и йога в парке по выходным 🌿',
+    people: ['Томирис', 'Эльвира', 'Арайлым', 'Ксения'],
+    chat: [
+      { who: 'Томирис', text: 'Завтра в 7:30 у Хан Шатыра, темп спокойный, 5 км 🏃‍♀️', t: '20:15' },
+      { who: 'Эльвира', text: 'Беру коврик, после пробежки растяжка! 🧘‍♀️', t: '20:40' }
+    ] },
+  { id: 'g4', name: 'Книжный клуб', city: 'Шымкент', e: '📚', members: 342, joined: false,
+    desc: 'Одна книга в месяц 📖, тёплые обсуждения и чай 🫖',
+    people: ['Гульнара', 'Ажар', 'Самал'],
+    chat: [{ who: 'Гульнара', text: 'В этом месяце читаем «Маленькие женщины», встреча 15-го 📖☕', t: '18:03' }] },
+  { id: 'g5', name: 'Цикл и спорт', city: 'Онлайн', e: '🏋️‍♀️', members: 1957, joined: false,
+    desc: 'Тренируемся в ритме своего цикла 🔁 — делимся планами и прогрессом 📈',
+    people: ['Анель', 'Виктория', 'Дильназ', 'Мира'],
+    chat: [{ who: 'Анель', text: 'Кто пробовал силовые в фолликулярной фазе? Прогресс реально быстрее! 💪', t: '13:45' }] }
+];
+
+/** Партнёры (вымышленные, для прототипа) */
+const CLINICS = [
+  { id: 'c1', e: '🩺', name: 'Клиника «Ана»', area: 'Астана · Есильский р-н', rating: 4.9, reviews: 312, price: 'от 12 000 ₸',
+    tags: ['👩‍⚕️ Гинекология', '🧬 Эндокринология', '📟 УЗИ'], specs: ['Гинеколог', 'Эндокринолог', 'Маммолог'],
+    review: { text: 'Врач выслушала без спешки и объяснила всё простым языком. Впервые не было неловко 🤍', author: 'Дина, 27' } },
+  { id: 'c2', e: '🧬', name: "Women's Health Lab", area: 'Алматы · Бостандыкский р-н', rating: 4.8, reviews: 528, price: 'от 9 500 ₸',
+    tags: ['🧪 Гормональная панель', '✅ Check-up', '💉 Анализы'], specs: ['Гинеколог-эндокринолог', 'Нутрициолог', 'Терапевт'],
+    review: { text: 'Сдала гормональную панель и через день получила разбор с понятными рекомендациями 📋', author: 'Камила, 31' } },
+  { id: 'c3', e: '🤰', name: 'Центр «Мейірім»', area: 'Астана · Алматинский р-н', rating: 4.7, reviews: 189, price: 'от 11 000 ₸',
+    tags: ['👶 Планирование', '🧠 Психолог'], specs: ['Репродуктолог', 'Психолог', 'Гинеколог'],
+    review: { text: 'Очень тёплое отношение и приватные кабинеты ожидания. Чувствуешь себя в безопасности 🕊️', author: 'Айым, 34' } }
+];
+
+const BEAUTY = [
+  { id: 'b1', e: '💅', name: 'Салон «Нур»', type: 'Салон красоты', halal: true, area: 'Астана · Нура', rating: 4.9, reviews: 241, price: 'от 5 000 ₸',
+    features: ['🚺 Без мужских зон', '🚪 Приватные кабинеты', '📜 Халяль-сертификат'], specs: ['Шугаринг', 'Маникюр', 'Брови'] },
+  { id: 'b2', e: '💇‍♀️', name: 'Studio Safa', type: 'Салон красоты', halal: true, area: 'Алматы · Медеуский р-н', rating: 4.8, reviews: 176, price: 'от 7 000 ₸',
+    features: ['👩 Только женский персонал', '🚪 Приватные кабинеты', '🧴 Халяль-косметика'], specs: ['Уход за лицом', 'Окрашивание', 'Укладка'] },
+  { id: 'b3', e: '🧖‍♀️', name: 'Hammam & Glow', type: 'Спа-студия', halal: true, area: 'Астана · Есильский р-н', rating: 4.9, reviews: 132, price: 'от 15 000 ₸',
+    features: ['♨️ Женский хаммам', '📜 Халяль-сертификат', '🚪 Отдельный вход'], specs: ['Хаммам', 'Пилинг-массаж', 'SPA-ритуал'] },
+  { id: 'b4', e: '💆‍♀️', name: 'Spa «Тыныштық»', type: 'Спа-студия', halal: false, area: 'Алматы · Алмалинский р-н', rating: 4.6, reviews: 98, price: 'от 12 000 ₸',
+    features: ['🕐 Женские часы ежедневно', '🚪 Приватные кабинеты'], specs: ['Массаж', 'Флоатинг', 'Уход за телом'] }
+];
+
+const PROMOS = [
+  { id: 'p1', brand: 'Lumière Cosmetics', cat: 'Косметика', discount: '−15%', code: 'SANA15',  until: 'до 30 ноября', e: '💄' },
+  { id: 'p2', brand: 'Oasis Modest Wear',  cat: 'Одежда',    discount: '−20%', code: 'OASIS20', until: 'до 15 декабря', e: '🧥' },
+  { id: 'p3', brand: 'Pure Botanica',      cat: 'Уход',      discount: '−10%', code: 'PURE10',  until: 'до 31 декабря', e: '🌿' },
+  { id: 'p4', brand: 'Velvet Active',      cat: 'Спорт',     discount: '−25%', code: 'MOVE25',  until: 'до 20 ноября', e: '🧘‍♀️' },
+  { id: 'p5', brand: 'Cycle Care',         cat: 'Гигиена',   discount: '1 + 1', code: 'CYCLE11', until: 'до 10 декабря', e: '🌸' }
+];
+
+const PRICE = 2490; // цена Premium, ₸ в месяц
+
+
+/* ========================== 2. СОСТОЯНИЕ ========================== */
+
+const STORE_KEY = 'sana-prototype-v2';
+
+/** Дата N дней назад в формате YYYY-MM-DD (локальное время) */
+function daysAgoISO(n) { const d = new Date(); d.setDate(d.getDate() - n); return isoOf(d); }
+function isoOf(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+
+/** Состояние по умолчанию (то, что сохраняется между сессиями) */
+function defaultState() {
+  return {
+    name: '',
+    theme: 'mono',
+    plan: 'free',                 // 'free' | 'premium'
+    profile: {                    // заполняется в онбординге
+      onboarded: false,
+      lastPeriod: daysAgoISO(1),  // дата начала последней менструации
+      cycleLength: 28,
+      goals: [],
+      restrictions: [],
+      activity: null
+    },
+    baseCalories: 1900,
+    customCalories: null,         // ручная норма; null = авто
+    tipsEnabled: true,
+    notifications: true,
+    water: 3,
+    meals: [],
+    xp: 340,
+    myQuestions: 0,
+    myAnswers: 0,
+    questions: JSON.parse(JSON.stringify(SEED_QUESTIONS)),
+    groups: JSON.parse(JSON.stringify(SEED_GROUPS)),
+    bookings: [],
+    loyalty: { paid: 3, claimed: false }
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    const s = Object.assign(defaultState(), JSON.parse(raw));
+    s.profile = Object.assign(defaultState().profile, s.profile);
+    return s;
+  } catch (e) { return null; }
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* работаем в памяти */ }
+}
+
+const state = loadState() || defaultState();
+
+/** Временное UI-состояние (не сохраняется) */
+const ui = {
+  tab: 'diary',
+  onboarding: !state.profile.onboarded,  // показать опросник при первом входе
+  ob: null,                              // черновик опросника { step, data }
+  tipIndex: 0,
+  calc: { query: '', selectedId: null, grams: 150 },
+  communityView: 'qa',
+  forumTag: 'Все',
+  groupCity: 'Все',
+  partnersView: 'clinics',
+  halalOnly: state.profile.restrictions.includes('halal'),
+  sheet: null,
+  scan: { stage: 'pick', img: null, dish: null },
+  ask: { tag: 'Здоровье', hideLevel: false },
+  booking: null
+};
+
+
+/* =========================== 3. ХЕЛПЕРЫ =========================== */
+
+const $ = (sel) => document.querySelector(sel);
+const fmt = (n) => Math.round(n).toLocaleString('ru-RU');
+const r1 = (n) => Math.round(n * 10) / 10;
+const todayISO = () => isoOf(new Date());
+
+function parseISO(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function daysBetween(a, b) {
+  return Math.round((Date.UTC(b.getFullYear(), b.getMonth(), b.getDate()) - Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / 86400000);
+}
+const shortDate = (d) => d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace('.', '');
+
+/** Экранирование пользовательского ввода */
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+/** Цвет фазы из переменных темы */
+const phc = (key, a = 1) => `rgb(var(--ph-${key}) / ${a})`;
+
+/** Всплывающее уведомление */
+let toastTimer;
+function toast(text) {
+  const el = $('#toast');
+  $('#toast-text').textContent = text;
+  el.style.opacity = '1';
+  el.style.transform = 'translate(-50%, 0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translate(-50%, -12px)'; }, 2300);
+}
+
+/** Конфетти в цветах текущей темы */
+function confetti() {
+  const cs = getComputedStyle(document.documentElement);
+  const colors = ['--a500', '--p500', '--warm', '--ph-follicular', '--ph-ovulatory', '--ph-luteal'].map((v) => `rgb(${cs.getPropertyValue(v)})`);
+  for (let i = 0; i < 50; i++) {
+    const d = document.createElement('div');
+    d.className = 'confetti';
+    d.style.left = Math.random() * 100 + 'vw';
+    d.style.background = colors[i % colors.length];
+    d.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+    d.style.animationDelay = (Math.random() * 0.3) + 's';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 3400);
+  }
+}
+
+/** Детерминированный «хэш» строки */
+function hash(str) { let h = 0; for (const ch of String(str)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; }
+
+const AVATAR_BG = ['rgb(var(--a100))', 'rgb(var(--soft))', 'rgb(var(--a200))', 'rgb(var(--line))', 'rgb(var(--p500) / .2)'];
+function avatar(label, i = 0, size = 'h-9 w-9 text-sm') {
+  return `<div class="${size} flex shrink-0 items-center justify-center rounded-full font-extrabold text-ink ring-2 ring-card" style="background:${AVATAR_BG[i % AVATAR_BG.length]}">${esc(label)}</div>`;
+}
+const anonAvatar = (size = 'h-8 w-8 text-[15px]') => `<span class="emoji ${size} flex shrink-0 items-center justify-center rounded-full bg-soft">🕊️</span>`;
+
+/** Переключатель-«таблетка» */
+function toggleSwitch(on, action) {
+  return `<button data-action="${action}" class="relative h-7 w-12 shrink-0 rounded-full ${on ? 'bg-accent-600' : 'bg-line'}" aria-pressed="${on}">
+    <span class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-6' : 'left-1'}"></span></button>`;
+}
+
+/** Сегментированный контрол: items = [[значение, подпись], ...] */
+function segmented(items, active, action) {
+  return `<div class="flex rounded-2xl bg-soft p-1">${items.map(([key, label]) => `
+    <button data-action="${action}" data-val="${key}" class="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-[13px] font-bold ${active === key ? 'bg-card text-ink shadow-glow' : 'text-muted'}">${label}</button>`).join('')}</div>`;
+}
+
+const stars = (rating) => `<span class="inline-flex items-center gap-1 text-[13px] font-extrabold text-ink"><span class="emoji">⭐</span>${rating.toFixed(1)}</span>`;
+const closeBtn = () => `<button data-action="closeSheet" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-soft text-[15px] font-bold text-muted" aria-label="Закрыть">✕</button>`;
+
+const isPremium = () => state.plan === 'premium';
+const premiumBadge = () => isPremium()
+  ? `<span class="hero inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-extrabold tracking-wide"><span class="emoji">👑</span>PREMIUM</span>`
+  : `<span class="rounded-full bg-soft px-2.5 py-1 text-[11px] font-extrabold tracking-wide text-muted"><span class="emoji">🌱</span> FREE</span>`;
+
+/** Шапка вкладки: заголовок + бейдж плана + переключатель темы (+ доп. кнопки) */
+function pageHeader(title, subtitle, extra = '') {
+  return `<header class="mb-5 flex items-start justify-between gap-3">
+    <div class="min-w-0"><p class="text-[13px] font-semibold text-muted">${subtitle}</p>
+    <h1 class="page-title mt-0.5 font-display text-[27px] leading-tight text-ink">${title}</h1></div>
+    <div class="flex shrink-0 items-center gap-2 pt-1">${premiumBadge()}
+      <button data-action="openSheet" data-sheet="theme" class="emoji flex h-10 w-10 items-center justify-center rounded-full bg-card text-[18px] shadow-glow" aria-label="Тема оформления">🎨</button>${extra}</div></header>`;
+}
+
+/** Применить тему: меняем data-theme на <html> — все CSS-переменные переключаются мгновенно */
+function applyTheme(id, animate = true) {
+  const html = document.documentElement;
+  if (animate) { html.classList.add('theme-anim'); setTimeout(() => html.classList.remove('theme-anim'), 600); }
+  html.dataset.theme = id;
+  const t = THEMES.find((x) => x.id === id) || THEMES[0];
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', t.meta);
+  state.theme = t.id;
+  save();
+}
+
+/** Мини-превью темы: сам блок получает data-theme и рисуется её переменными */
+function themePreview(t, size = 'big') {
+  const active = state.theme === t.id;
+  if (size === 'chip') {
+    return `<button data-action="setTheme" data-val="${t.id}" class="w-[104px] shrink-0 text-left">
+      <div data-theme="${t.id}" class="app-surface overflow-hidden rounded-2xl p-2 ${active ? 'ring-2 ring-offset-2 ring-accent-600' : 'ring-1 ring-line'}" style="--tw-ring-offset-color: rgb(var(--card))">
+        <div class="hero flex h-9 items-center justify-center rounded-xl text-[18px]"><span class="emoji">${t.e}</span></div>
+        <div class="mt-1.5 flex gap-1"><span class="cta h-3 w-8 rounded-full"></span><span class="h-3 flex-1 rounded-full bg-card shadow-glow"></span></div>
+      </div>
+      <p class="mt-1.5 truncate text-[11.5px] font-bold ${active ? 'text-ink' : 'text-muted'}">${t.name.split(' ')[0]} ${t.name.split(' ')[1] || ''}</p></button>`;
+  }
+  return `<button data-action="setTheme" data-val="${t.id}" class="flex w-full items-center gap-3 rounded-[22px] bg-card p-3 text-left shadow-glow ${active ? 'ring-2 ring-accent-600' : ''}">
+    <div data-theme="${t.id}" class="app-surface w-24 shrink-0 overflow-hidden rounded-2xl p-2 ring-1 ring-black/5">
+      <div class="hero flex h-10 items-center justify-center rounded-xl text-[20px]"><span class="emoji">${t.e}</span></div>
+      <div class="mt-1.5 flex gap-1"><span class="cta h-3.5 w-9 rounded-full"></span><span class="h-3.5 flex-1 rounded-full bg-card shadow-glow"></span></div>
+      <div class="mt-1 h-2 w-12 rounded-full bg-soft"></div>
+    </div>
+    <div class="min-w-0 flex-1"><p class="text-[15px] font-extrabold text-ink"><span class="emoji">${t.e}</span> ${t.name}</p>
+      <p class="mt-0.5 text-[12.5px] font-semibold text-muted">${t.sub}</p></div>
+    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold ${active ? 'cta' : 'bg-soft text-muted'}">${active ? '✓' : ''}</span>
+  </button>`;
+}
+
+
+/* ======================= 4. БИЗНЕС-ЛОГИКА ========================= */
+
+/** Границы фаз по длине цикла (овуляция ≈ за 14 дней до конца цикла) */
+function phaseSegments(len) {
+  const ov = len - 14;
+  return [
+    { key: 'menstrual',  start: 1,      end: 5 },
+    { key: 'follicular', start: 6,      end: ov - 2 },
+    { key: 'ovulatory',  start: ov - 1, end: ov + 1 },
+    { key: 'luteal',     start: ov + 2, end: len }
+  ];
+}
+function phaseKeyForDay(day, len) {
+  return (phaseSegments(len).find((s) => day >= s.start && day <= s.end) || { key: 'luteal' }).key;
+}
+
+/** День цикла вычисляется из даты последних месячных — единый источник правды */
+function cycleDayFrom(lastISO, len) {
+  const diff = daysBetween(parseISO(lastISO), new Date());
+  return ((diff % len) + len) % len + 1;
+}
+const cycleLen = () => state.profile.cycleLength;
+const cycleDay = () => cycleDayFrom(state.profile.lastPeriod, cycleLen());
+/** Ручная коррекция дня цикла = сдвиг даты начала месячных */
+function setCycleDay(day) { state.profile.lastPeriod = daysAgoISO(day - 1); }
+
+const currentPhaseKey = () => phaseKeyForDay(cycleDay(), cycleLen());
+const currentPhase = () => PHASES[currentPhaseKey()];
+
+/** Прогноз следующих месячных */
+function nextPeriod(lastISO = state.profile.lastPeriod, len = cycleLen()) {
+  const day = cycleDayFrom(lastISO, len);
+  const inDays = len - day + 1;
+  const d = new Date(); d.setDate(d.getDate() + inDays);
+  return { date: d, inDays };
+}
+
+/** Базовая норма из опросника: активность + цель */
+function calcBase(profile) {
+  const act = ACTIVITY.find((a) => a.id === profile.activity) || ACTIVITY[1];
+  return Math.max(1400, act.base + (profile.goals.includes('lose') ? -300 : 0));
+}
+
+/** Итоговая норма калорий: ручная или базовая + поправка фазы */
+function calorieGoal() {
+  return state.customCalories ? state.customCalories : state.baseCalories + currentPhase().kcal;
+}
+
+function totals() {
+  return state.meals.reduce((t, m) => ({ kcal: t.kcal + m.kcal, p: t.p + m.p, f: t.f + m.f, c: t.c + m.c }), { kcal: 0, p: 0, f: 0, c: 0 });
+}
+
+/** Цели по БЖУ: больше белка при похудении и активном образе жизни */
+function macroGoals() {
+  const k = calorieGoal();
+  const pr = (state.profile.goals.includes('lose') || state.profile.activity === 'active') ? 0.30 : 0.25;
+  return { p: k * pr / 4, f: k * 0.30 / 9, c: k * (0.70 - pr) / 4 };
+}
+
+function focusDone(item) {
+  if (item === 'Гидратация') return state.water >= currentPhase().water;
+  return state.meals.some((m) => (m.micro || []).includes(item));
+}
+
+/** Какие ограничения пользовательницы нарушает продукт/блюдо */
+function conflictsOf(item) {
+  return RESTRICTIONS.filter((r) => state.profile.restrictions.includes(r.id) && (item.has || []).some((h) => r.excl.includes(h)));
+}
+
+/** AI-рекомендация под гормональный фон */
+function hormoneAdvice(dish) {
+  const ph = currentPhase();
+  const hits = dish.micro.filter((m) => ph.focus.includes(m));
+  if (hits.length) {
+    return `Отличный выбор для ${ph.adj} фазы ${ph.e} Здесь есть ${hits.map((h) => `${MICRO_E[h] || ''} ${h.toLowerCase()}`).join(', ')} — именно то, что сейчас нужно телу. ${ph.extra}`;
+  }
+  return `Сытно и вкусно 😋 Чтобы поддержать гормональный фон в ${ph.adj} фазе ${ph.e}, добавь к блюду ${ph.addons}.`;
+}
+
+/** AI-советы: советы фазы + персональные по целям и ограничениям */
+function getTips() {
+  const key = currentPhaseKey(), ph = PHASES[key];
+  const g = state.profile.goals, r = state.profile.restrictions;
+  const tips = [...ph.tips];
+  if (g.includes('pms') && (key === 'luteal' || key === 'menstrual')) {
+    tips.unshift('🌙 Ты хотела мягче проходить ПМС: сегодня добавь магний 🍫 и B6 🍌, а вечером — тёплую ванну 🛁 и сон до 23:00 😴 Это работает! 💛');
+  }
+  if (g.includes('lose')) {
+    tips.push(key === 'luteal'
+      ? '⚖️ В лютеиновую фазу не урезай калории сильнее — тело правда тратит больше 🔥 Дефицит подождёт пару дней, а срывов не будет 🕊️'
+      : '⚖️ Мягкий дефицит работает лучше жёстких диет: белок в каждом приёме пищи 🥚 и 8 тысяч шагов 🚶‍♀️ — и результат придёт ✨');
+  }
+  if (r.includes('lactose')) tips.push('🥛 Без лактозы кальций можно взять из кунжута, брокколи 🥦 и миндального молока — косточки скажут спасибо 💪');
+  if (r.includes('vegetarian') && key === 'menstrual') tips.push('🥗 Вегетарианкам в эти дни особенно важно железо: чечевица 🫘 + шпинат 🥬 + капля лимона 🍋 для усвоения.');
+  return tips;
+}
+
+/** Уровни и опыт */
+function levelOf(xp) { return [...LEVELS].reverse().find((l) => xp >= l.xp); }
+const levelByNum = (n) => LEVELS[Math.min(Math.max(n, 1), LEVELS.length) - 1];
+function addXp(amount) {
+  const before = levelOf(state.xp).lvl;
+  state.xp += amount;
+  const after = levelOf(state.xp);
+  if (after.lvl > before) setTimeout(() => { toast(`${after.e} Новый уровень: ${after.name}!`); confetti(); }, 400);
+}
+function levelBadge(lvl) {
+  const L = levelByNum(lvl);
+  return `<span class="text-[11.5px] font-bold text-accent-700"><span class="emoji">${L.e}</span> Уровень ${L.lvl} • ${L.name}</span>`;
+}
+
+function setPlan(plan) {
+  state.plan = plan;
+  save();
+  toast(plan === 'premium' ? '👑 Premium активирован ✨' : '🌱 Включён режим FREE');
+  render();
+}
+
+
+/* ======================= 5. ОНБОРДИНГ (ОПРОСНИК) ======================= */
+
+const OB_META = [
+  { e: '🩸', title: 'Давай познакомимся', sub: 'Даты цикла помогут подстроить питание и советы под твои гормоны' },
+  { e: '🎯', title: 'Твои цели', sub: 'Можно выбрать несколько — соберём план под тебя' },
+  { e: '🥑', title: 'Ограничения и аллергии', sub: 'Уберём из подсказок то, что тебе не подходит' },
+  { e: '🧘‍♀️', title: 'Физическая активность', sub: 'От неё зависит твоя базовая норма калорий' }
+];
+
+/** Открыть опросник (при первом входе или «Пройти опрос заново») */
+function startOnboarding() {
+  const p = state.profile;
+  ui.ob = {
+    step: 0,
+    data: {
+      name: state.name, lastPeriod: p.lastPeriod, cycleLength: p.cycleLength,
+      goals: [...p.goals], restrictions: [...p.restrictions], activity: p.activity
+    }
+  };
+  ui.onboarding = true;
+}
+
+/** Живое превью: день цикла, фаза и прогноз по введённым данным */
+function obPreview() {
+  const d = ui.ob.data;
+  if (!d.lastPeriod) return `<p class="text-[13px] font-semibold text-muted">📅 Выбери дату — и мы рассчитаем твою фазу</p>`;
+  const day = cycleDayFrom(d.lastPeriod, d.cycleLength);
+  const key = phaseKeyForDay(day, d.cycleLength), ph = PHASES[key];
+  const np = nextPeriod(d.lastPeriod, d.cycleLength);
+  return `<div class="flex items-center gap-3">
+      <span class="emoji flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-card text-[24px] shadow-glow">${ph.e}</span>
+      <div><p class="text-[14.5px] font-extrabold text-ink">Сегодня ${day}-й день · ${ph.name} фаза</p>
+      <p class="text-[12.5px] font-semibold text-muted">🗓️ Следующие месячные ≈ ${shortDate(np.date)} (через ${np.inDays} дн.)</p></div></div>`;
+}
+
+function obStepCycle() {
+  const d = ui.ob.data;
+  const quick = [[0, 'Сегодня'], [2, '2 дня назад'], [7, 'Неделю назад'], [14, '2 недели назад']];
+  return `
+    <label class="block rounded-[22px] bg-card p-4 shadow-glow">
+      <span class="text-[13px] font-bold text-muted">👋 Как тебя зовут?</span>
+      <input id="ob-name" value="${esc(d.name)}" maxlength="24" placeholder="Например, Айгерим" class="mt-2 w-full rounded-xl bg-soft px-4 py-3 text-[16px] font-bold text-ink outline-none placeholder:text-muted/60 focus:ring-2 focus:ring-accent-300" />
+    </label>
+    <div class="rounded-[22px] bg-card p-4 shadow-glow">
+      <p class="text-[13px] font-bold text-muted">🩸 Дата начала последней менструации</p>
+      <input id="ob-date" type="date" max="${todayISO()}" value="${d.lastPeriod || ''}" class="mt-2 w-full rounded-xl bg-soft px-4 py-3 text-[16px] font-bold text-ink outline-none focus:ring-2 focus:ring-accent-300" />
+      <div class="mt-3 flex flex-wrap gap-2">${quick.map(([n, l]) => `
+        <button data-action="obDate" data-val="${n}" class="rounded-full px-3 py-1.5 text-[12.5px] font-bold ${d.lastPeriod === daysAgoISO(n) ? 'cta' : 'bg-soft text-ink'}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="rounded-[22px] bg-card p-4 shadow-glow">
+      <div class="flex items-center justify-between"><p class="text-[13px] font-bold text-muted">🔁 Средняя длина цикла</p>
+        <p class="text-[15px] font-extrabold text-ink"><span id="ob-len-label">${d.cycleLength}</span> дней</p></div>
+      <input id="ob-len" type="range" min="22" max="40" value="${d.cycleLength}" class="mt-3 w-full" />
+      <div class="flex justify-between text-[11px] font-bold text-muted"><span>22</span><span>28 — норма 💫</span><span>40</span></div>
+      <p class="mt-2 text-[12px] font-semibold text-muted">Не знаешь точно? Оставь 28 — уточним по ходу 🕊️</p>
+    </div>
+    <div id="ob-preview" class="rounded-[22px] p-4" style="background:rgb(var(--a100))">${obPreview()}</div>`;
+}
+
+function obStepGoals() {
+  const g = ui.ob.data.goals;
+  return `<div class="grid grid-cols-2 gap-3">${GOALS.map((x) => {
+    const on = g.includes(x.id);
+    return `<button data-action="obGoal" data-val="${x.id}" class="relative flex min-h-[150px] flex-col items-start rounded-[22px] p-4 text-left shadow-glow ${on ? 'bg-accent-50 ring-2 ring-accent-600' : 'bg-card'}">
+      <span class="emoji text-[34px]">${x.e}</span>
+      <span class="mt-3 text-[15px] font-extrabold leading-tight text-ink">${x.name}</span>
+      <span class="mt-1 text-[12px] font-semibold leading-snug text-muted">${x.sub}</span>
+      ${on ? '<span class="cta absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-extrabold">✓</span>' : ''}
+    </button>`;
+  }).join('')}</div>
+  <p class="text-center text-[12px] font-semibold text-muted">⚖️ «Сбросить вес» и 💪 «Поддерживать форму» — взаимоисключающие</p>`;
+}
+
+function obStepFood() {
+  const r = ui.ob.data.restrictions;
+  return `<div class="grid grid-cols-2 gap-2.5">${RESTRICTIONS.map((x) => {
+    const on = r.includes(x.id);
+    // Эмодзи и чекбокс — в верхней строке, название — на всю ширину карточки (длинные слова не обрезаются)
+    return `<button data-action="obRestr" data-val="${x.id}" class="flex flex-col gap-2 rounded-[20px] p-3.5 text-left shadow-glow ${on ? 'bg-accent-50 ring-2 ring-accent-600' : 'bg-card'}">
+      <span class="flex w-full items-center justify-between">
+        <span class="emoji text-[26px]">${x.e}</span>
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-extrabold ${on ? 'cta' : 'ring-2 ring-line'}">${on ? '✓' : ''}</span>
+      </span>
+      <span class="text-[14px] font-bold leading-tight text-ink">${x.name}</span>
+    </button>`;
+  }).join('')}</div>
+  <button data-action="obRestrNone" class="w-full rounded-[20px] p-3.5 text-[14px] font-bold shadow-glow ${r.length ? 'bg-card text-muted' : 'bg-accent-50 text-ink ring-2 ring-accent-600'}"><span class="emoji">✨</span> Без ограничений</button>
+  <p class="text-center text-[12px] font-semibold text-muted">🕊️ Изменить можно в любой момент в профиле</p>`;
+}
+
+function obStepActivity() {
+  const d = ui.ob.data;
+  const base = calcBase({ ...d, activity: d.activity || 'moderate' });
+  return `<div class="space-y-2.5">${ACTIVITY.map((x) => {
+    const on = d.activity === x.id;
+    return `<button data-action="obActivity" data-val="${x.id}" class="flex w-full items-center gap-4 rounded-[22px] p-4 text-left shadow-glow ${on ? 'bg-accent-50 ring-2 ring-accent-600' : 'bg-card'}">
+      <span class="emoji flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-soft text-[26px]">${x.e}</span>
+      <span class="flex-1"><span class="block text-[15px] font-extrabold text-ink">${x.name}</span><span class="block text-[12.5px] font-semibold text-muted">${x.sub}</span></span>
+      <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${on ? 'cta' : 'ring-2 ring-line'} text-[12px] font-extrabold">${on ? '✓' : ''}</span>
+    </button>`;
+  }).join('')}</div>
+  ${d.activity ? `
+  <div class="hero fade-in rounded-[22px] p-5 shadow-lift">
+    <p class="text-[12px] font-extrabold uppercase tracking-wider opacity-80">✨ Твой персональный план</p>
+    <p class="mt-1 font-display text-[30px] leading-none">${fmt(base)} <span class="font-sans text-[14px] font-bold opacity-80">ккал / база</span></p>
+    <p class="mt-2 text-[13px] font-semibold opacity-90">+ поправка по фазе цикла: 🩸 +200 · 🌱 0 · 🌸 +100 · 🌙 +250</p>
+    ${d.goals.includes('lose') ? '<p class="mt-1 text-[13px] font-semibold opacity-90">⚖️ Учтён мягкий дефицит −300 ккал</p>' : ''}
+  </div>` : ''}`;
+}
+
+function renderOnboarding() {
+  const o = ui.ob, step = o.step, meta = OB_META[step];
+  const body = [obStepCycle, obStepGoals, obStepFood, obStepActivity][step]();
+  const left = step > 0
+    ? `<button data-action="obBack" class="flex h-10 w-10 items-center justify-center rounded-full bg-card text-[20px] font-bold text-ink shadow-glow" aria-label="Назад">‹</button>`
+    : state.profile.onboarded
+      ? `<button data-action="obCancel" class="flex h-10 w-10 items-center justify-center rounded-full bg-card text-[15px] font-bold text-muted shadow-glow" aria-label="Отмена">✕</button>`
+      : `<span class="text-[14px] font-extrabold text-ink"><span class="emoji">✨</span> Sana</span>`;
+  return `
+  <div class="flex min-h-[calc(100vh-3rem)] flex-col">
+    <div class="flex items-center justify-between">
+      ${left}
+      <span class="rounded-full bg-card px-3 py-1.5 text-[12.5px] font-extrabold text-muted shadow-glow">Шаг ${step + 1} из 4</span>
+      <button data-action="openSheet" data-sheet="theme" class="emoji flex h-10 w-10 items-center justify-center rounded-full bg-card text-[18px] shadow-glow" aria-label="Тема">🎨</button>
+    </div>
+    <div class="mt-4 grid grid-cols-4 gap-1.5">${[0, 1, 2, 3].map((i) => `
+      <div class="h-2 overflow-hidden rounded-full bg-line/70"><div class="ob-fill h-full rounded-full" style="width:${i <= step ? 100 : 0}%;background:var(--cta-bg)"></div></div>`).join('')}</div>
+
+    <div class="fade-in flex-1" key="${step}">
+      <div class="mt-7 flex justify-center">
+        <div class="hero float flex h-24 w-24 items-center justify-center rounded-[32px] shadow-lift"><span class="emoji text-[48px]">${meta.e}</span></div>
+      </div>
+      <h1 class="page-title mt-5 text-center font-display text-[26px] leading-tight text-ink">${meta.title}</h1>
+      <p class="mx-auto mt-2 max-w-[300px] text-center text-[14px] font-medium leading-snug text-muted">${meta.sub}</p>
+      <div class="mt-6 space-y-3">${body}</div>
+    </div>
+
+    <div class="sticky bottom-0 -mx-4 mt-6 bg-gradient-to-t from-page via-page/95 to-transparent px-4 pb-5 pt-6">
+      <button data-action="${step < 3 ? 'obNext' : 'obFinish'}" class="cta shine w-full rounded-2xl py-4 text-[16px] font-extrabold shadow-lift">
+        ${step < 3 ? 'Далее →' : 'Завершить настройку ✨'}</button>
+    </div>
+  </div>`;
+}
+
+
+/* ======================== 6. РЕНДЕР ВКЛАДОК ======================= */
+
+function render() {
+  const view = $('#view');
+  const nav = $('#bottom-nav');
+  if (ui.onboarding) {
+    if (!ui.ob) startOnboarding();
+    nav.classList.add('hidden');
+    view.innerHTML = renderOnboarding();
+    return;
+  }
+  nav.classList.remove('hidden');
+  const renderers = { diary: renderDiary, community: renderCommunity, partners: renderPartners, profile: renderProfile };
+  view.innerHTML = `<div class="fade-in">${renderers[ui.tab]()}</div>`;
+
+  document.querySelectorAll('.nav-btn').forEach((b) => {
+    const active = b.dataset.tab === ui.tab;
+    b.className = `nav-btn flex flex-col items-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-bold ${active ? 'bg-accent-100 text-accent-700' : 'text-muted'}`;
+    b.querySelector('.nav-emoji').className = `emoji nav-emoji text-[22px] transition-transform ${active ? 'scale-110' : 'opacity-80 grayscale-[30%]'}`;
+  });
+
+  if (ui.tab === 'diary') updateCalc();
+}
+
+/* ---------------------- 6.1 ДНЕВНИК И AI ---------------------- */
+
+/** Кольцо цикла (SVG) с сегментами фаз и маркером текущего дня */
+function phaseRing() {
+  const len = cycleLen(), day = cycleDay(), R = 62, C = 2 * Math.PI * R;
+  const active = currentPhaseKey();
+  const arcs = phaseSegments(len).filter((s) => s.end >= s.start).map((s) => {
+    const startOff = (s.start - 1) / len * C;
+    const segLen = (s.end - s.start + 1) / len * C;
+    const isActive = s.key === active;
+    return `<circle cx="80" cy="80" r="${R}" fill="none" style="stroke:${phc(s.key, isActive ? 1 : 0.28)}"
+      stroke-width="${isActive ? 12 : 8}" stroke-linecap="round" stroke-dasharray="${Math.max(segLen - 14, 1)} ${C}" stroke-dashoffset="${-(startOff + 7)}" />`;
+  }).join('');
+  const ang = ((day - 0.5) / len) * 2 * Math.PI;
+  const x = 80 + R * Math.cos(ang), y = 80 + R * Math.sin(ang);
+  return `<svg viewBox="0 0 160 160" class="h-[148px] w-[148px] shrink-0">
+    <g transform="rotate(-90 80 80)">${arcs}
+      <circle cx="${x}" cy="${y}" r="9" style="fill:rgb(var(--card));stroke:${phc(active)}" stroke-width="3.5"/>
+    </g>
+    <text x="80" y="62" text-anchor="middle" font-size="20">${PHASES[active].e}</text>
+    <text x="80" y="82" text-anchor="middle" style="font-family:Manrope;fill:rgb(var(--muted))" font-size="10" font-weight="800">ДЕНЬ</text>
+    <text x="80" y="110" text-anchor="middle" style="font-family:var(--font-display);fill:rgb(var(--ink))" font-size="30" font-weight="700">${day}</text>
+  </svg>`;
+}
+
+function renderDiary() {
+  const ph = currentPhase(), key = currentPhaseKey();
+  const goal = calorieGoal(), t = totals(), mg = macroGoals();
+  const left = goal - t.kcal;
+  const pct = Math.min(100, (t.kcal / goal) * 100);
+  const date = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  const np = nextPeriod();
+  const p = state.profile;
+  const tips = getTips();
+  const act = ACTIVITY.find((a) => a.id === p.activity);
+
+  const macroBar = (e, label, val, goalVal, color) => `
+    <div>
+      <p class="text-[12px] font-bold text-muted"><span class="emoji">${e}</span> ${label}</p>
+      <p class="mb-1.5 text-[13px] font-extrabold text-ink">${fmt(val)}<span class="font-semibold text-muted"> / ${fmt(goalVal)} г</span></p>
+      <div class="h-1.5 overflow-hidden rounded-full bg-soft"><div class="h-full rounded-full transition-all duration-500" style="width:${Math.min(100, val / goalVal * 100)}%;background:${color}"></div></div>
+    </div>`;
+
+  return `
+  ${pageHeader(`Привет, ${esc(state.name || 'подруга')} 👋`, date.charAt(0).toUpperCase() + date.slice(1),
+    `<button data-action="openSheet" data-sheet="settings" class="emoji flex h-10 w-10 items-center justify-center rounded-full bg-card text-[18px] shadow-glow" aria-label="Ручные настройки">⚙️</button>`)}
+
+  <div class="stagger space-y-4">
+
+    <!-- Индикатор фазы цикла -->
+    <section class="relative overflow-hidden rounded-[28px] p-5 shadow-glow" style="background:linear-gradient(160deg, ${phc(key, .16)}, ${phc(key, .05)}), rgb(var(--card))">
+      <div class="breathe absolute -right-10 -top-10 h-40 w-40 rounded-full" style="background:${phc(key, .14)}"></div>
+      <div class="relative flex items-center gap-3">
+        ${phaseRing()}
+        <div class="min-w-0">
+          <p class="text-[11.5px] font-extrabold uppercase tracking-wider" style="color:${phc(key)}">Фаза цикла</p>
+          <h2 class="font-display text-[21px] leading-tight text-ink">${ph.name}</h2>
+          <p class="mt-1 text-[13px] leading-snug text-ink/75">${ph.desc}</p>
+          <p class="mt-2 text-[12px] font-bold text-muted">🗓️ Месячные ≈ ${shortDate(np.date)} · через ${np.inDays} дн.</p>
+        </div>
+      </div>
+      <div class="relative mt-4 grid grid-cols-4 gap-1.5">
+        ${PHASE_ORDER.map((k) => `
+          <button data-action="setPhase" data-val="${k}" class="flex flex-col items-center gap-1 rounded-2xl px-1 py-2 text-[10.5px] font-extrabold ${k === key ? 'bg-card text-ink shadow-glow' : 'bg-card/40 text-muted'}">
+            <span class="emoji flex h-8 w-8 items-center justify-center rounded-full text-[17px]" style="background:${phc(k, k === key ? .22 : .1)}">${PHASES[k].e}</span>${PHASES[k].short}
+          </button>`).join('')}
+      </div>
+    </section>
+
+    <!-- Персональный план из опросника -->
+    <section class="rounded-[24px] bg-card p-4 shadow-glow">
+      <div class="flex items-center justify-between">
+        <p class="text-[12px] font-extrabold uppercase tracking-wider text-muted">🎯 Твой план</p>
+        <button data-action="restartOnboarding" class="text-[12.5px] font-bold text-accent-700">✏️ Изменить</button>
+      </div>
+      <div class="mt-2.5 flex flex-wrap gap-1.5">
+        ${act ? `<span class="rounded-full bg-soft px-2.5 py-1 text-[12px] font-bold text-ink">${act.e} ${act.name}</span>` : ''}
+        ${p.goals.map((id) => { const g = GOALS.find((x) => x.id === id); return `<span class="rounded-full bg-accent-100 px-2.5 py-1 text-[12px] font-bold text-accent-700">${g.e} ${g.name}</span>`; }).join('')}
+        ${p.restrictions.map((id) => { const r = RESTRICTIONS.find((x) => x.id === id); return `<span class="rounded-full bg-warm/15 px-2.5 py-1 text-[12px] font-bold text-warm">🚫 ${r.e} ${r.name}</span>`; }).join('')}
+      </div>
+    </section>
+
+    <!-- Динамическая норма + фокус -->
+    <section class="rounded-[28px] bg-card p-5 shadow-glow">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-[12px] font-extrabold uppercase tracking-wider text-muted">🔥 Норма на сегодня</p>
+          <p class="mt-1 font-display text-[30px] leading-none text-ink">${fmt(goal)} <span class="font-sans text-[15px] font-bold text-muted">ккал</span></p>
+          <p class="mt-1.5 text-[12.5px] font-bold ${state.customCalories ? 'text-warm' : 'text-accent-700'}">
+            ${state.customCalories ? '✍️ Задана вручную' : (ph.kcal ? `${ph.e} +${ph.kcal} ккал с учётом фазы` : `${ph.e} Базовая норма фазы`)}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-[12px] font-bold text-muted">${left >= 0 ? 'Осталось' : 'Сверх нормы'}</p>
+          <p class="text-[20px] font-extrabold ${left >= 0 ? 'text-ink' : 'text-warm'}">${fmt(Math.abs(left))}</p>
+        </div>
+      </div>
+      <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-soft">
+        <div class="cta h-full rounded-full transition-all duration-700" style="width:${pct}%"></div>
+      </div>
+      <div class="mt-4 grid grid-cols-3 gap-3">
+        ${macroBar('🥚', 'Белки', t.p, mg.p, 'rgb(var(--a500))')}${macroBar('🥑', 'Жиры', t.f, mg.f, 'rgb(var(--p500))')}${macroBar('🍞', 'Углеводы', t.c, mg.c, 'rgb(var(--warm))')}
+      </div>
+      <div class="mt-4 border-t border-soft pt-4">
+        <p class="mb-2 text-[12px] font-extrabold uppercase tracking-wider text-muted">🎯 Фокус фазы</p>
+        <div class="flex flex-wrap gap-2">
+          ${ph.focus.map((f) => `<span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold ${focusDone(f) ? 'cta' : 'bg-soft text-ink/80'}">
+            <span class="emoji">${focusDone(f) ? '✅' : MICRO_E[f]}</span>${f}</span>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <!-- AI-совет дня -->
+    ${state.tipsEnabled ? `
+    <section class="hero relative overflow-hidden rounded-[28px] p-5 shadow-lift">
+      <div class="absolute -bottom-12 -right-8 h-36 w-36 rounded-full bg-white/10"></div>
+      <div class="relative">
+        <div class="flex items-center justify-between">
+          <p class="text-[12px] font-extrabold uppercase tracking-wider opacity-85">✨ AI-совет дня</p>
+          <button data-action="nextTip" class="rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-bold hover:bg-white/25">🔄 Ещё</button>
+        </div>
+        <p id="tip-text" class="mt-3 font-display text-[17px] leading-relaxed" style="font-weight:500;letter-spacing:0">${tips[ui.tipIndex % tips.length]}</p>
+        <p class="mt-3 text-[11.5px] font-bold opacity-75">💬 Совет ${ui.tipIndex % tips.length + 1} из ${tips.length} · подобран под фазу и цели</p>
+      </div>
+    </section>` : `
+    <button data-action="toggleTips" class="flex w-full items-center justify-between rounded-[22px] border border-dashed border-line bg-card/60 px-5 py-4 text-left text-[13.5px] font-bold text-muted">
+      <span>✨ AI-советы выключены</span><span class="text-accent-700">Включить</span></button>`}
+
+    <!-- Переключатель FREE / PREMIUM -->
+    <section>${segmented([['free', '🌱 FREE'], ['premium', '👑 PREMIUM']], state.plan, 'setPlan')}</section>
+
+    <!-- AI-сканер (Premium) или тизер (Free) -->
+    ${isPremium() ? `
+    <button data-action="openScanner" class="hero shine flex w-full items-center gap-4 rounded-[28px] p-5 text-left shadow-lift">
+      <span class="emoji flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-[28px]">📸</span>
+      <span class="flex-1"><span class="block text-[17px] font-extrabold">AI-сканер по фото</span>
+      <span class="mt-0.5 block text-[13px] opacity-85">Сфоткай блюдо 🍽️ — БЖУ и совет под твою фазу за секунды</span></span>
+      <span class="text-[22px] font-bold">›</span>
+    </button>` : `
+    <button data-action="openSheet" data-sheet="upgrade" class="relative flex w-full items-center gap-4 overflow-hidden rounded-[28px] border border-line bg-card p-5 text-left shadow-glow">
+      <span class="emoji flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-soft text-[26px]">🔒</span>
+      <span class="flex-1"><span class="block text-[16px] font-extrabold text-ink">📸 AI-сканер по фото</span>
+      <span class="mt-0.5 block text-[13px] text-muted">Доступно в Premium 👑 · 3 + 1 месяц в подарок 🎁</span></span>
+      <span class="cta rounded-full px-3 py-1.5 text-[12px] font-extrabold">Открыть</span>
+    </button>`}
+
+    <!-- Быстрый калькулятор -->
+    <section class="rounded-[28px] bg-card p-5 shadow-glow">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="font-display text-[19px] text-ink">🧮 Быстрый калькулятор</h3>
+        <span class="text-[11.5px] font-bold text-muted">на 100 г → граммы</span>
+      </div>
+      <label class="flex items-center gap-2 rounded-2xl bg-soft px-4 py-3 focus-within:ring-2 focus-within:ring-accent-300">
+        <span class="emoji">🔍</span>
+        <input id="food-search" value="${esc(ui.calc.query)}" placeholder="Гречка, лосось, банан, круассан…" autocomplete="off"
+          class="w-full bg-transparent text-[15px] font-semibold text-ink outline-none placeholder:text-muted/70" />
+      </label>
+      <div id="calc-results" class="mt-3"></div>
+      <div id="calc-preview"></div>
+    </section>
+
+    <!-- Приёмы пищи за день -->
+    <section class="rounded-[28px] bg-card p-5 shadow-glow">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="font-display text-[19px] text-ink">🍽️ Сегодня съедено</h3>
+        ${state.meals.length ? `<button data-action="clearMeals" class="text-[12.5px] font-bold text-muted hover:text-warm">🧹 Очистить</button>` : ''}
+      </div>
+      ${state.meals.length ? `<ul class="divide-y divide-soft">${state.meals.map((m) => `
+        <li class="flex items-center gap-3 py-3">
+          <span class="emoji tile flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[22px]">${m.e}</span>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-[14.5px] font-bold text-ink">${esc(m.name)}</p>
+            <p class="text-[12px] font-semibold text-muted">${fmt(m.grams)} г · Б ${r1(m.p)} · Ж ${r1(m.f)} · У ${r1(m.c)} ${m.source === 'ai' ? '· <span class="font-extrabold text-accent-700">✨ AI</span>' : ''}</p>
+          </div>
+          <span class="text-[14px] font-extrabold text-ink">${fmt(m.kcal)}</span>
+          <button data-action="removeMeal" data-id="${m.id}" class="flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold text-muted hover:bg-soft" aria-label="Удалить">✕</button>
+        </li>`).join('')}</ul>`
+      : `<div class="flex flex-col items-center rounded-2xl bg-soft/70 px-4 py-6 text-center">
+          <span class="emoji text-[34px]">🥗🥐🍓</span><p class="mt-2 text-[13.5px] font-semibold text-muted">Пока пусто. Добавь первый приём пищи через калькулятор${isPremium() ? ' или AI-сканер 📸' : ''}</p></div>`}
+    </section>
+
+    <!-- Гидратация -->
+    <section class="rounded-[28px] bg-card p-5 shadow-glow">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="font-display text-[19px] text-ink">💧 Вода</h3>
+        <span class="text-[13px] font-extrabold text-ink">${state.water} / ${ph.water} стаканов</span>
+      </div>
+      <div class="grid grid-cols-10 gap-1.5">
+        ${Array.from({ length: Math.max(ph.water, 10) }, (_, i) => `
+          <button data-action="water" data-n="${i + 1}" class="emoji flex h-11 items-center justify-center rounded-xl text-[17px] ${i < state.water ? 'bg-accent-100' : 'bg-soft opacity-40 grayscale'} ${i >= ph.water ? 'opacity-30' : ''}" aria-label="Стакан ${i + 1}">💧</button>`).join('')}
+      </div>
+      ${key === 'menstrual' ? `<p class="mt-3 text-[12.5px] font-bold text-accent-700">🩸 В менструальную фазу норма воды увеличена — гидратация в фокусе.</p>` : ''}
+    </section>
+
+    <p class="px-2 pb-2 text-center text-[11.5px] font-medium leading-relaxed text-muted">🩺 Sana не ставит диагнозы и не заменяет врача. Рекомендации носят общий характер.</p>
+  </div>`;
+}
+
+/** Результаты поиска калькулятора (без перерисовки всей страницы — сохраняет фокус) */
+function updateCalc() {
+  const res = $('#calc-results'), prev = $('#calc-preview');
+  if (!res) return;
+  const q = ui.calc.query.trim().toLowerCase();
+  const focus = currentPhase().focus;
+  let list, title;
+  if (q) {
+    list = FOOD_DB.filter((f) => f.name.toLowerCase().includes(q));
+    title = list.length ? `🔎 Найдено: ${list.length}` : '';
+  } else {
+    // Подборка под фазу — только разрешённые продукты
+    list = FOOD_DB.filter((f) => !conflictsOf(f).length)
+      .sort((a, b) => b.micro.filter((m) => focus.includes(m)).length - a.micro.filter((m) => focus.includes(m)).length).slice(0, 6);
+    title = `${currentPhase().e} Под твою фазу`;
+  }
+  const hidden = state.profile.restrictions.length
+    ? `<p class="mt-2 text-[11.5px] font-semibold text-muted">🚫 Учитываем ограничения: ${state.profile.restrictions.map((id) => RESTRICTIONS.find((r) => r.id === id).name.toLowerCase()).join(', ')}</p>` : '';
+  res.innerHTML = list.length ? `
+    <p class="mb-2 text-[12px] font-extrabold uppercase tracking-wider text-muted">${title}</p>
+    <div class="flex flex-wrap gap-2">${list.map((f) => {
+      const bad = conflictsOf(f);
+      if (bad.length) return `<span class="inline-flex items-center gap-1.5 rounded-full border border-dashed border-line px-3 py-1.5 text-[13px] font-semibold text-muted line-through decoration-1" title="Ограничение">
+        <span class="emoji">${f.e}</span>${f.name}<span class="no-underline emoji">🚫</span></span>`;
+      return `<button data-action="selectFood" data-id="${f.id}" class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-bold ${ui.calc.selectedId === f.id ? 'cta border-transparent' : 'border-line bg-card text-ink hover:border-accent-300'}">
+        <span class="emoji">${f.e}</span>${f.name}</button>`;
+    }).join('')}</div>${hidden}`
+    : `<p class="rounded-2xl bg-soft/70 px-4 py-3 text-[13px] font-semibold text-muted">🤷‍♀️ Ничего не нашлось. Попробуй «рис», «курица» или «йогурт».</p>`;
+
+  const food = FOOD_DB.find((f) => f.id === ui.calc.selectedId);
+  prev.innerHTML = food ? `
+    <div class="fade-in mt-4 rounded-2xl bg-accent-50 p-4">
+      <div class="flex items-center gap-3">
+        <span class="emoji text-[30px]">${food.e}</span>
+        <div class="flex-1"><p class="text-[15px] font-extrabold text-ink">${food.name}</p>
+          <p class="text-[12px] font-semibold text-muted">${food.kcal} ккал на 100 г · ${food.micro.map((m) => MICRO_E[m]).join('')}</p></div>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <label class="flex flex-1 items-center gap-2 rounded-xl bg-card px-3 py-2.5 ring-1 ring-line focus-within:ring-accent-500">
+          <span class="emoji">⚖️</span>
+          <input id="food-grams" type="number" inputmode="numeric" min="1" max="2000" value="${ui.calc.grams}" class="w-full bg-transparent text-[15px] font-extrabold text-ink outline-none" />
+          <span class="text-[13px] font-bold text-muted">г</span>
+        </label>
+        ${[50, 100, 200].map((g) => `<button data-action="setGrams" data-val="${g}" class="rounded-xl bg-card px-3 py-2.5 text-[13px] font-extrabold text-muted ring-1 ring-line">${g}</button>`).join('')}
+      </div>
+      <div id="calc-numbers" class="mt-3"></div>
+      <button data-action="addFood" class="cta mt-3 w-full rounded-2xl py-3.5 text-[15px] font-extrabold">➕ Добавить в дневник</button>
+    </div>` : '';
+  updateCalcNumbers();
+}
+
+function updateCalcNumbers() {
+  const box = $('#calc-numbers');
+  const food = FOOD_DB.find((f) => f.id === ui.calc.selectedId);
+  if (!box || !food) return;
+  const k = (ui.calc.grams || 0) / 100;
+  const cell = (label, val) => `<div class="rounded-xl bg-card py-2 text-center"><p class="text-[16px] font-extrabold text-ink">${val}</p><p class="text-[11px] font-bold text-muted">${label}</p></div>`;
+  box.innerHTML = `<div class="grid grid-cols-4 gap-2">${cell('🔥 ккал', fmt(food.kcal * k))}${cell('🥚 Б, г', r1(food.p * k))}${cell('🥑 Ж, г', r1(food.f * k))}${cell('🍞 У, г', r1(food.c * k))}</div>`;
+}
+
+/* ---------------------- 6.2 ФОРУМ И СООБЩЕСТВА ---------------------- */
+
+function renderCommunity() {
+  return `
+  ${pageHeader('Сообщество 💬', 'Тёплое место без осуждения 🕊️')}
+  <div class="mb-4">${segmented([['qa', '💬 Вопросы'], ['groups', '📍 Гео-группы']], ui.communityView, 'communityView')}</div>
+  ${ui.communityView === 'qa' ? renderForum() : renderGroups()}`;
+}
+
+function renderForum() {
+  const me = levelOf(state.xp);
+  const next = LEVELS.find((l) => l.xp > state.xp);
+  const progress = next ? ((state.xp - me.xp) / (next.xp - me.xp)) * 100 : 100;
+  const list = state.questions.filter((q) => ui.forumTag === 'Все' || q.tag === ui.forumTag);
+
+  return `<div class="stagger space-y-4">
+    <!-- Карточка геймификации -->
+    <section class="flex items-center gap-4 rounded-[28px] bg-card p-4 shadow-glow">
+      <div class="relative">${avatar((state.name || '🌷').charAt(0), 0, 'h-14 w-14 text-lg')}
+        <span class="emoji absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-card text-[15px] shadow-glow">${me.e}</span></div>
+      <div class="min-w-0 flex-1">
+        <p class="text-[14.5px] font-extrabold text-ink">${esc(state.name || 'Ты')} <span class="font-semibold text-muted">· в ленте анонимно 🕊️</span></p>
+        <p class="text-[12.5px] font-bold text-accent-700">Уровень ${me.lvl} • ${me.name}</p>
+        <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-soft"><div class="cta h-full rounded-full" style="width:${progress}%"></div></div>
+        <p class="mt-1 text-[11px] font-bold text-muted">${next ? `✨ ${state.xp} / ${next.xp} XP до «${next.e} ${next.name}»` : 'Максимальный уровень 👑'}</p>
+      </div>
+    </section>
+
+    <button data-action="openSheet" data-sheet="ask" class="hero flex w-full items-center gap-3 rounded-[22px] px-5 py-4 text-left shadow-lift">
+      <span class="emoji flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-[22px]">🕊️</span>
+      <span class="flex-1"><span class="block text-[15px] font-extrabold">Задать анонимный вопрос</span><span class="block text-[12.5px] opacity-80">+15 XP ✨ · твоё имя никто не увидит</span></span>
+      <span class="text-[24px] font-bold">＋</span>
+    </button>
+
+    <div class="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+      ${FORUM_TAGS.map((t) => `<button data-action="forumTag" data-val="${t}" class="shrink-0 rounded-full px-4 py-2 text-[13px] font-bold ${ui.forumTag === t ? 'cta' : 'bg-card text-muted shadow-glow'}"><span class="emoji">${TAG_E[t]}</span> ${t}</button>`).join('')}
+    </div>
+
+    ${list.length ? list.map(questionCard).join('') : `<p class="rounded-2xl bg-card p-5 text-center text-[13.5px] font-semibold text-muted">🌱 В этом разделе пока нет вопросов — стань первой!</p>`}
+  </div>`;
+}
+
+function questionCard(q) {
+  const L = levelByNum(q.authorLvl);
+  return `
+  <article class="rounded-[24px] bg-card p-4 shadow-glow">
+    <div class="flex items-center justify-between">
+      <span class="rounded-full px-2.5 py-1 text-[11.5px] font-extrabold ${TAG_STYLE[q.tag]}"><span class="emoji">${TAG_E[q.tag]}</span> ${q.tag}</span>
+      <span class="text-[11.5px] font-semibold text-muted">🕐 ${q.time}</span>
+    </div>
+    <button data-action="openThread" data-id="${q.id}" class="mt-3 block w-full text-left font-display text-[17px] leading-snug text-ink">${esc(q.text)}</button>
+    <div class="mt-3 flex items-center gap-2">
+      ${anonAvatar()}
+      <div class="leading-tight"><p class="text-[12.5px] font-extrabold text-ink">${q.mine ? 'Анонимно (это ты)' : 'Анонимно'}</p><p class="text-[11px] font-bold text-accent-700">${L.e} Уровень ${L.lvl} • ${L.name}</p></div>
+    </div>
+    <div class="mt-3 flex items-center gap-2 border-t border-soft pt-3">
+      <button data-action="likeQuestion" data-id="${q.id}" class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-extrabold ${q.liked ? 'bg-prime-500/15 text-prime-700' : 'bg-soft text-muted'}">
+        <span class="emoji like-emoji">${q.liked ? '❤️' : '🤍'}</span>${q.likes}</button>
+      <button data-action="openThread" data-id="${q.id}" class="flex items-center gap-1.5 rounded-full bg-soft px-3 py-1.5 text-[13px] font-bold text-muted">
+        <span class="emoji">💬</span>${q.answers.length} ${plural(q.answers.length, ['ответ', 'ответа', 'ответов'])}</button>
+      <button data-action="openThread" data-id="${q.id}" class="ml-auto text-[13px] font-extrabold text-accent-700">Открыть ›</button>
+    </div>
+  </article>`;
+}
+
+function plural(n, forms) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return forms[0];
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return forms[1];
+  return forms[2];
+}
+
+function renderGroups() {
+  const list = state.groups.filter((g) => ui.groupCity === 'Все' || g.city === ui.groupCity);
+  return `<div class="stagger space-y-4">
+    <div class="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+      ${CITIES.map(([c, e]) => `<button data-action="groupCity" data-val="${c}" class="shrink-0 rounded-full px-4 py-2 text-[13px] font-bold ${ui.groupCity === c ? 'cta' : 'bg-card text-muted shadow-glow'}"><span class="emoji">${e}</span> ${c}</button>`).join('')}
+    </div>
+    ${list.map((g) => `
+    <article class="overflow-hidden rounded-[26px] bg-card shadow-glow">
+      <div class="flex items-center gap-4 p-4">
+        <span class="emoji tile flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-[32px]">${g.e}</span>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-display text-[18px] leading-tight text-ink">${g.name}</h3>
+          <p class="mt-0.5 text-[12.5px] font-semibold text-muted">📍 ${g.city} · 👭 ${fmt(g.members)} ${plural(g.members, ['участница', 'участницы', 'участниц'])}</p>
+        </div>
+      </div>
+      <p class="px-4 text-[13.5px] leading-snug text-ink/75">${g.desc}</p>
+      <div class="flex items-center gap-3 p-4">
+        <div class="flex -space-x-2">${g.people.slice(0, 4).map((p, i) => avatar(p.charAt(0), i, 'h-8 w-8 text-[12px]')).join('')}</div>
+        <div class="ml-auto flex gap-2">
+          ${g.joined ? `<button data-action="openGroup" data-id="${g.id}" class="rounded-full bg-accent-100 px-4 py-2 text-[13px] font-extrabold text-accent-700">💬 Чат</button>` : ''}
+          <button data-action="joinGroup" data-id="${g.id}" class="rounded-full px-4 py-2 text-[13px] font-extrabold ${g.joined ? 'bg-soft text-muted' : 'cta'}">
+            ${g.joined ? '✅ Вы в группе' : '➕ Вступить'}</button>
+        </div>
+      </div>
+    </article>`).join('')}
+  </div>`;
+}
+
+/* ---------------------- 6.3 ПАРТНЁРЫ И СКИДКИ ---------------------- */
+
+function renderPartners() {
+  const views = { clinics: renderClinics, beauty: renderBeauty, promos: renderPromos };
+  return `
+  ${pageHeader('Партнёры 🛍️', 'Проверено сообществом Sana ✅')}
+  <div class="mb-4">${segmented([['clinics', '🩺 Клиники'], ['beauty', '💅 Бьюти'], ['promos', '🛍️ Скидки']], ui.partnersView, 'partnersView')}</div>
+  ${views[ui.partnersView]()}`;
+}
+
+function bookingFor(placeId) { return state.bookings.find((b) => b.placeId === placeId); }
+
+function bookingButton(place, label) {
+  const b = bookingFor(place.id);
+  return b
+    ? `<div class="flex items-center justify-between gap-2 rounded-2xl bg-accent-50 px-4 py-3">
+        <span class="text-[13px] font-extrabold text-accent-700">✅ ${b.dateLabel}, ${b.time} · ${esc(b.spec)}</span>
+        <button data-action="cancelBooking" data-id="${b.id}" class="shrink-0 text-[12.5px] font-bold text-muted hover:text-warm">Отменить</button></div>`
+    : `<button data-action="openBooking" data-id="${place.id}" class="cta w-full rounded-2xl py-3.5 text-[14.5px] font-extrabold">${label}</button>`;
+}
+
+function renderClinics() {
+  return `<div class="stagger space-y-4">
+    <div class="rounded-[22px] bg-accent-50 p-4 text-[13px] font-semibold leading-snug text-accent-700">
+      🛡️ <b>Проверенные клиники:</b> лицензии, отзывы пользовательниц Sana и анонимные визиты нашей команды 🕵️‍♀️</div>
+    ${CLINICS.map((c) => `
+    <article class="rounded-[26px] bg-card p-5 shadow-glow">
+      <div class="flex items-start gap-3">
+        <span class="emoji tile flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-[24px]">${c.e}</span>
+        <div class="min-w-0 flex-1"><h3 class="font-display text-[18px] leading-tight text-ink">${c.name}</h3>
+          <p class="mt-1 text-[12.5px] font-semibold text-muted">📍 ${c.area}</p></div>
+        <div class="text-right">${stars(c.rating)}<p class="text-[11.5px] font-semibold text-muted">${c.reviews} отзывов</p></div>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-1.5">${c.tags.map((t) => `<span class="rounded-full bg-soft px-2.5 py-1 text-[11.5px] font-bold text-ink/80">${t}</span>`).join('')}</div>
+      <blockquote class="mt-3 rounded-2xl bg-soft/70 p-3 text-[13px] italic leading-snug text-ink/80">💬 «${c.review.text}»
+        <span class="mt-1 block not-italic text-[11.5px] font-bold text-muted">— ${c.review.author}, пользовательница Sana</span></blockquote>
+      <p class="mb-3 mt-3 text-[13px] font-extrabold text-ink">💳 Консультация ${c.price}</p>
+      ${bookingButton(c, '📅 Записаться на консультацию')}
+    </article>`).join('')}
+  </div>`;
+}
+
+function renderBeauty() {
+  const list = BEAUTY.filter((b) => !ui.halalOnly || b.halal);
+  return `<div class="stagger space-y-4">
+    <div class="flex items-center justify-between rounded-[22px] bg-card p-4 shadow-glow">
+      <div><p class="text-[14.5px] font-extrabold text-ink">☪️ Только Халяль-места</p><p class="text-[12px] font-semibold text-muted">Сертификаты, приватность, женский персонал</p></div>
+      ${toggleSwitch(ui.halalOnly, 'toggleHalal')}
+    </div>
+    ${list.map((b) => `
+    <article class="rounded-[26px] bg-card p-5 shadow-glow">
+      <div class="flex items-start gap-3">
+        <span class="emoji tile flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-[24px]">${b.e}</span>
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-muted">${b.type}</span>
+            ${b.halal ? `<span class="cta rounded-full px-2 py-0.5 text-[10.5px] font-extrabold">☪️ Халяль</span>` : ''}
+          </div>
+          <h3 class="mt-0.5 font-display text-[18px] leading-tight text-ink">${b.name}</h3>
+          <p class="mt-1 text-[12.5px] font-semibold text-muted">📍 ${b.area}</p>
+        </div>
+        <div class="text-right">${stars(b.rating)}<p class="text-[11.5px] font-semibold text-muted">${b.reviews} отзывов</p></div>
+      </div>
+      <ul class="mt-3 space-y-1.5">${b.features.map((f) => `<li class="text-[13px] font-bold text-ink/85">${f}</li>`).join('')}</ul>
+      <p class="mb-3 mt-3 text-[13px] font-semibold text-muted">✨ ${b.specs.join(' · ')} — <b class="text-ink">${b.price}</b></p>
+      ${bookingButton(b, '💅 Забронировать визит')}
+    </article>`).join('')}
+    ${!list.length ? '<p class="text-center text-[13px] font-semibold text-muted">🤷‍♀️ Нет мест по фильтру</p>' : ''}
+  </div>`;
+}
+
+function renderPromos() {
+  return `<div class="stagger space-y-4">
+    ${isPremium() ? `
+    <div class="hero rounded-[22px] p-4 text-[13.5px] font-bold shadow-lift">👑 Промокоды открыты — нажми на код, чтобы скопировать 📋</div>` : `
+    <div class="hero rounded-[24px] p-5 shadow-lift">
+      <p class="text-[12px] font-extrabold uppercase tracking-wider opacity-85">🔒 Только для Premium</p>
+      <p class="mt-2 font-display text-[18px] leading-snug" style="font-weight:600;letter-spacing:0">Скидки до 25% 🛍️ у партнёров окупают подписку уже с первой покупки</p>
+      <button data-action="openSheet" data-sheet="upgrade" class="mt-4 w-full rounded-2xl bg-white py-3 text-[14px] font-extrabold text-black">👑 Открыть промокоды</button>
+    </div>`}
+    ${PROMOS.map((p) => `
+    <article class="flex items-center gap-4 rounded-[24px] bg-card p-4 shadow-glow">
+      <span class="emoji tile flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-[28px]">${p.e}</span>
+      <div class="min-w-0 flex-1">
+        <p class="text-[11px] font-extrabold uppercase tracking-wider text-muted">${p.cat} · ⏳ ${p.until}</p>
+        <p class="truncate text-[15px] font-extrabold text-ink">${p.brand}</p>
+        <button data-action="${isPremium() ? 'copyCode' : 'openSheet'}" data-sheet="upgrade" data-code="${p.code}"
+          class="mt-1.5 inline-flex items-center gap-2 rounded-lg border border-dashed border-accent-300 bg-accent-50 px-2.5 py-1 font-mono text-[13px] font-extrabold text-accent-700">
+          <span class="${isPremium() ? '' : 'blur-code'}">${p.code}</span><span class="emoji">${isPremium() ? '📋' : '🔒'}</span></button>
+      </div>
+      <span class="font-display text-[21px] text-warm">${p.discount}</span>
+    </article>`).join('')}
+  </div>`;
+}
+
+/* ---------------------- 6.4 ПРОФИЛЬ И ЛОЯЛЬНОСТЬ ---------------------- */
+
+function renderProfile() {
+  const me = levelOf(state.xp);
+  const joined = state.groups.filter((g) => g.joined).length;
+  const L = state.loyalty;
+
+  const monthTile = (i) => {
+    const paid = L.paid >= i;
+    return `<div class="flex flex-col items-center justify-center rounded-2xl px-1 py-3 text-center ${paid ? 'cta' : 'border border-dashed border-line bg-page text-muted'}">
+      <span class="emoji text-[20px]">${paid ? '✅' : '⏳'}</span><span class="mt-1 text-[11.5px] font-extrabold">Месяц ${i}</span>
+      <span class="text-[10.5px] font-semibold opacity-80">${paid ? 'оплачен' : fmt(PRICE) + ' ₸'}</span></div>`;
+  };
+  const giftReady = L.paid >= 3;
+  const giftTile = `<div class="flex flex-col items-center justify-center rounded-2xl px-1 py-3 text-center ${L.claimed ? 'hero' : giftReady ? 'gift-glow bg-warm/15 text-warm ring-2 ring-warm' : 'bg-soft text-muted'}">
+      <span class="emoji text-[20px]">${L.claimed ? '🎁' : '🎉'}</span><span class="mt-1 text-[11.5px] font-extrabold">Месяц 4</span>
+      <span class="text-[10.5px] font-extrabold">${L.claimed ? 'активирован' : 'БЕСПЛАТНО'}</span></div>`;
+
+  let loyaltyBtn;
+  if (L.claimed) loyaltyBtn = `<button data-action="newLoyaltyCycle" class="w-full rounded-2xl bg-soft py-3.5 text-[14px] font-extrabold text-ink">🔁 Начать новый круг 3 + 1</button>`;
+  else if (giftReady) loyaltyBtn = `<button data-action="claimGift" class="cta shine w-full rounded-2xl py-3.5 text-[14.5px] font-extrabold shadow-lift">🎁 Забрать подарочный месяц 🎉</button>`;
+  else loyaltyBtn = `<button data-action="payMonth" class="cta w-full rounded-2xl py-3.5 text-[14.5px] font-extrabold">💳 Оплатить месяц ${L.paid + 1} · ${fmt(PRICE)} ₸ (демо)</button>`;
+
+  const settingRow = (e, label, right, action = '', sheet = '') => `
+    <${action ? 'button' : 'div'} ${action ? `data-action="${action}" ${sheet ? `data-sheet="${sheet}"` : ''}` : ''} class="flex w-full items-center gap-3 px-4 py-3.5 text-left">
+      <span class="emoji flex h-9 w-9 items-center justify-center rounded-xl bg-soft text-[17px]">${e}</span>
+      <span class="flex-1 text-[14.5px] font-bold text-ink">${label}</span>${right}</${action ? 'button' : 'div'}>`;
+  const chevron = '<span class="text-[20px] font-bold text-muted">›</span>';
+
+  return `
+  ${pageHeader('Профиль 🙋‍♀️', 'Твоё пространство ✨')}
+  <div class="stagger space-y-4">
+
+    <section class="rounded-[28px] bg-card p-5 shadow-glow">
+      <div class="flex items-center gap-4">
+        <div class="relative">${avatar((state.name || '🌷').charAt(0), 1, 'h-16 w-16 text-2xl')}
+          <span class="emoji absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-card text-[15px] shadow-glow">${me.e}</span></div>
+        <div class="min-w-0 flex-1">
+          <h2 class="truncate font-display text-[22px] text-ink">${esc(state.name || 'Подруга')}</h2>
+          <p class="text-[12.5px] font-bold text-accent-700">Уровень ${me.lvl} • ${me.name}</p>
+        </div>
+        <button data-action="openSheet" data-sheet="name" class="emoji flex h-10 w-10 items-center justify-center rounded-full bg-soft text-[16px]" aria-label="Изменить имя">✏️</button>
+      </div>
+      <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+        ${[['✨', state.xp, 'XP'], ['📝', state.myQuestions + state.myAnswers, 'постов'], ['👭', joined, plural(joined, ['группа', 'группы', 'групп'])]].map(([e, n, l]) => `
+          <div class="rounded-2xl bg-soft/70 py-3"><p class="text-[18px] font-extrabold text-ink"><span class="emoji text-[15px]">${e}</span> ${n}</p><p class="text-[11.5px] font-bold text-muted">${l}</p></div>`).join('')}
+      </div>
+    </section>
+
+    <!-- Темы оформления -->
+    <section class="rounded-[28px] bg-card p-5 shadow-glow">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="font-display text-[19px] text-ink">🎨 Тема оформления</h3>
+        <button data-action="openSheet" data-sheet="theme" class="text-[12.5px] font-bold text-accent-700">Все темы ›</button>
+      </div>
+      <div class="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5 pb-1 pt-1">${THEMES.map((t) => themePreview(t, 'chip')).join('')}</div>
+    </section>
+
+    <!-- Подписка -->
+    <section class="rounded-[28px] p-5 shadow-glow ${isPremium() ? 'hero shadow-lift' : 'bg-card'}">
+      <div class="flex items-center justify-between">
+        <div><p class="text-[12px] font-extrabold uppercase tracking-wider ${isPremium() ? 'opacity-80' : 'text-muted'}">Подписка</p>
+          <p class="mt-1 font-display text-[22px] ${isPremium() ? '' : 'text-ink'}">${isPremium() ? 'Sana Premium' : 'Sana Free'}</p>
+          <p class="text-[13px] font-semibold ${isPremium() ? 'opacity-85' : 'text-muted'}">${isPremium() ? `💳 ${fmt(PRICE)} ₸ / месяц · продление 29 ноября` : '🧮 Калькулятор · 💬 форум · 📍 группы'}</p></div>
+        <span class="emoji text-[38px]">${isPremium() ? '👑' : '🌱'}</span>
+      </div>
+      <button data-action="${isPremium() ? 'setPlan' : 'openSheet'}" data-val="free" data-sheet="upgrade"
+        class="mt-4 w-full rounded-2xl py-3 text-[14px] font-extrabold ${isPremium() ? 'bg-white/20' : 'cta'}">
+        ${isPremium() ? 'Отменить Premium' : '👑 Перейти на Premium'}</button>
+    </section>
+
+    <!-- Карта лояльности «3 + 1» -->
+    <section class="relative overflow-hidden rounded-[28px] bg-card p-5 shadow-glow">
+      <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-warm/15"></div>
+      <div class="relative">
+        <p class="text-[12px] font-extrabold uppercase tracking-wider text-warm">🎁 Карта постоянной клиентки</p>
+        <h3 class="page-title mt-1 font-display text-[28px] text-ink">3 + 1</h3>
+        <p class="mt-1 text-[13.5px] font-medium leading-snug text-ink/75">Покупай подписку 3 месяца подряд — 4-й месяц получай в подарок! 🎉</p>
+        <div class="mt-4 grid grid-cols-4 gap-2">${monthTile(1)}${monthTile(2)}${monthTile(3)}${giftTile}</div>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-soft"><div class="cta h-full rounded-full transition-all duration-700" style="width:${(Math.min(L.paid, 3) + (L.claimed ? 1 : 0)) / 4 * 100}%"></div></div>
+        <div class="mt-4">${loyaltyBtn}</div>
+      </div>
+    </section>
+
+    ${state.bookings.length ? `
+    <section class="rounded-[28px] bg-card p-5 shadow-glow">
+      <h3 class="mb-3 font-display text-[19px] text-ink">📅 Мои записи</h3>
+      <ul class="space-y-2">${state.bookings.map((b) => `
+        <li class="flex items-center gap-3 rounded-2xl bg-soft/70 p-3">
+          <span class="emoji flex h-10 w-10 items-center justify-center rounded-xl bg-card text-[18px]">${b.e || '📅'}</span>
+          <div class="min-w-0 flex-1"><p class="truncate text-[14px] font-extrabold text-ink">${esc(b.title)}</p><p class="text-[12px] font-semibold text-muted">${esc(b.spec)} · ${b.dateLabel}, ${b.time}</p></div>
+          <button data-action="cancelBooking" data-id="${b.id}" class="flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold text-muted hover:bg-card" aria-label="Отменить">✕</button>
+        </li>`).join('')}</ul>
+    </section>` : ''}
+
+    <section class="divide-y divide-soft overflow-hidden rounded-[28px] bg-card shadow-glow">
+      ${settingRow('📝', 'Пройти опрос заново', chevron, 'restartOnboarding')}
+      ${settingRow('⚙️', 'Цикл и норма калорий', chevron, 'openSheet', 'settings')}
+      ${settingRow('✨', 'AI-советы дня', toggleSwitch(state.tipsEnabled, 'toggleTips'))}
+      ${settingRow('🔔', 'Напоминания о воде и цикле', toggleSwitch(state.notifications, 'toggleNotif'))}
+      ${settingRow('🔒', 'Конфиденциальность', '<span class="text-[12px] font-bold text-accent-700">📱 На устройстве</span>', 'privacy')}
+      ${settingRow('🔄', 'Сбросить демо-данные', chevron, 'openSheet', 'reset')}
+    </section>
+    <p class="pb-2 text-center text-[11.5px] font-bold text-muted">Sana · прототип v2.0 🕊️</p>
+  </div>`;
+}
+
+
+/* ===================== 7. НИЖНИЕ ЛИСТЫ (МОДАЛКИ) ===================== */
+
+const sheetTitle = (title, sub = '') => `
+  <div class="mb-4 flex items-start justify-between gap-3">
+    <div><h2 class="font-display text-[23px] leading-tight text-ink">${title}</h2>${sub ? `<p class="mt-1 text-[13px] font-medium text-muted">${sub}</p>` : ''}</div>
+    ${closeBtn()}
+  </div>`;
+
+const SHEETS = {
+
+  /** 🎨 Выбор темы */
+  theme() {
+    return `${sheetTitle('🎨 Тема оформления', 'Меняется мгновенно — попробуй все 5 ✨')}
+      <div class="space-y-2.5">${THEMES.map((t) => themePreview(t)).join('')}</div>`;
+  },
+
+  /** ⚙️ Ручные настройки: день цикла, длина, фаза, норма калорий, советы */
+  settings() {
+    const s = ui.sheet;
+    const previewKey = phaseKeyForDay(s.day, s.len);
+    return `${sheetTitle('⚙️ Ручные настройки', 'Ты знаешь своё тело лучше любого алгоритма 🤍')}
+    <div class="space-y-4">
+      <div class="rounded-2xl bg-card p-4 shadow-glow">
+        <div class="flex items-center justify-between"><p class="text-[14px] font-extrabold text-ink">🗓️ День цикла</p>
+          <p id="set-phase-wrap" class="text-[14px] font-extrabold" style="color:${phc(previewKey)}"><span id="set-day-label">${s.day}</span> · <span id="set-phase-label">${PHASES[previewKey].e} ${PHASES[previewKey].name}</span></p></div>
+        <input id="set-day" type="range" min="1" max="${s.len}" value="${s.day}" class="mt-3 w-full" />
+        <p class="mt-3 text-[12.5px] font-bold text-muted">Или выбери фазу напрямую:</p>
+        <div class="mt-2 grid grid-cols-2 gap-2">${PHASE_ORDER.map((k) => `
+          <button data-action="sheetPhase" data-val="${k}" class="rounded-xl px-3 py-2.5 text-left text-[13px] font-extrabold text-ink ${previewKey === k ? '' : 'bg-soft'}" style="${previewKey === k ? `background:${phc(k, .16)};box-shadow:inset 0 0 0 2px ${phc(k)}` : ''}">
+            <span class="emoji">${PHASES[k].e}</span> ${PHASES[k].name}</button>`).join('')}</div>
+      </div>
+
+      <div class="rounded-2xl bg-card p-4 shadow-glow">
+        <div class="flex items-center justify-between"><p class="text-[14px] font-extrabold text-ink">🔁 Длина цикла</p><p class="text-[14px] font-extrabold text-ink"><span id="set-len-label">${s.len}</span> дней</p></div>
+        <input id="set-len" type="range" min="22" max="40" value="${s.len}" class="mt-3 w-full" />
+      </div>
+
+      <div class="rounded-2xl bg-card p-4 shadow-glow">
+        <p class="text-[14px] font-extrabold text-ink">🔥 Своя норма калорий</p>
+        <p class="mt-0.5 text-[12.5px] font-medium text-muted">Авто: база из опроса + поправка фазы. Оставь пустым для авто-режима.</p>
+        <div class="mt-3 flex items-center gap-2">
+          <label class="flex flex-1 items-center gap-2 rounded-xl bg-soft px-3 py-3 focus-within:ring-2 focus-within:ring-accent-300">
+            <span class="emoji">✍️</span>
+            <input id="set-kcal" type="number" inputmode="numeric" min="1000" max="4500" placeholder="Например, 2000" value="${s.kcal || ''}" class="w-full bg-transparent text-[15px] font-extrabold text-ink outline-none placeholder:text-muted/60" />
+            <span class="text-[13px] font-bold text-muted">ккал</span>
+          </label>
+          <button data-action="resetCalories" class="rounded-xl bg-soft px-3 py-3 text-[13px] font-extrabold text-muted">🤖 Авто</button>
+        </div>
+        <div class="mt-3 flex items-center justify-between gap-3"><p class="text-[13px] font-semibold text-ink/80">Базовая норма (без фазы)</p>
+          <input id="set-base" type="number" inputmode="numeric" min="1000" max="4000" value="${s.base}" class="w-24 rounded-xl bg-soft px-3 py-2 text-right text-[14px] font-extrabold text-ink outline-none focus:ring-2 focus:ring-accent-300" /></div>
+      </div>
+
+      <div class="flex items-center justify-between rounded-2xl bg-card p-4 shadow-glow">
+        <div><p class="text-[14px] font-extrabold text-ink">✨ AI-советы дня</p><p class="text-[12.5px] font-medium text-muted">Поддерживающие подсказки на главном</p></div>
+        ${toggleSwitch(s.tips, 'sheetTips')}
+      </div>
+
+      <button data-action="saveSettings" class="cta w-full rounded-2xl py-4 text-[15px] font-extrabold">💾 Сохранить</button>
+      <button data-action="restartOnboarding" class="w-full rounded-2xl bg-soft py-3.5 text-[14px] font-extrabold text-ink">📝 Пройти опрос заново</button>
+    </div>`;
+  },
+
+  /** 📸 AI-сканер по фото (симуляция) */
+  scanner() {
+    const sc = ui.scan;
+    if (sc.stage === 'pick') {
+      return `${sheetTitle('📸 AI-сканер блюда', `Учтём ${currentPhase().adj} фазу ${currentPhase().e} и твои ограничения`)}
+      <label for="scan-file" class="flex cursor-pointer flex-col items-center justify-center rounded-[24px] border-2 border-dashed border-accent-300 bg-accent-50 px-6 py-9 text-center">
+        <span class="emoji float flex h-16 w-16 items-center justify-center rounded-full bg-card text-[30px] shadow-glow">📷</span>
+        <span class="mt-3 text-[16px] font-extrabold text-ink">Сфотографировать или загрузить</span>
+        <span class="mt-1 text-[12.5px] font-semibold text-muted">JPG, PNG, HEIC · фото остаётся на устройстве 📱</span>
+      </label>
+      <input id="scan-file" type="file" accept="image/*" capture="environment" class="hidden" />
+      <p class="mb-2 mt-5 text-[12px] font-extrabold uppercase tracking-wider text-muted">🍽️ Или попробуй демо-фото</p>
+      <div class="grid grid-cols-3 gap-2">${SCAN_DISHES.map((d) => `
+        <button data-action="scanDemo" data-id="${d.id}" class="tile flex aspect-square flex-col items-center justify-center rounded-2xl p-2 text-center">
+          <span class="emoji text-[32px]">${d.e}</span><span class="mt-1 text-[10.5px] font-extrabold leading-tight text-ink/75">${d.name.split(' ').slice(0, 2).join(' ')}</span></button>`).join('')}</div>`;
+    }
+
+    const media = sc.img
+      ? `<img src="${sc.img}" alt="Фото блюда" class="h-full w-full object-cover" />`
+      : `<div class="tile flex h-full w-full items-center justify-center"><span class="emoji text-[86px]">${sc.dish.e}</span></div>`;
+
+    if (sc.stage === 'scanning') {
+      return `${sheetTitle('🔬 Анализирую…', 'Распознаю ингредиенты и порцию')}
+      <div class="relative h-64 overflow-hidden rounded-[24px]">${media}
+        <div class="scan-grid absolute inset-0"></div><div class="scan-line"></div>
+        <div class="absolute inset-3 rounded-[18px] border-2 border-white/80"></div></div>
+      <ul class="mt-5 space-y-2.5 text-[13.5px] font-bold text-muted">
+        <li><span class="spin emoji">⏳</span> Определяю блюдо…</li>
+        <li class="opacity-70">⚖️ Оцениваю вес порции</li>
+        <li class="opacity-50">✨ Сверяю с гормональным фоном</li>
+      </ul>`;
+    }
+
+    const d = sc.dish;
+    const mg = macroGoals();
+    const bad = conflictsOf(d);
+    const bar = (label, val, goal, color) => `
+      <div class="flex items-center gap-3"><span class="w-24 text-[12.5px] font-bold text-muted">${label}</span>
+        <div class="h-2 flex-1 overflow-hidden rounded-full bg-soft"><div class="h-full rounded-full" style="width:${Math.min(100, val / goal * 100)}%;background:${color}"></div></div>
+        <span class="w-12 text-right text-[13px] font-extrabold text-ink">${val} г</span></div>`;
+    return `${sheetTitle('Готово ✨', '🎯 Распознано с точностью 94%')}
+      <div class="relative h-44 overflow-hidden rounded-[24px]">${media}
+        <span class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11.5px] font-extrabold text-black">✨ AI</span></div>
+      <div class="mt-4 flex items-end justify-between gap-3">
+        <div><h3 class="font-display text-[20px] leading-tight text-ink">${d.e} ${d.name}</h3><p class="text-[13px] font-semibold text-muted">⚖️ ≈ ${d.grams} г</p></div>
+        <p class="shrink-0 font-display text-[30px] leading-none text-ink">${d.kcal}<span class="font-sans text-[13px] font-bold text-muted"> ккал</span></p>
+      </div>
+      ${bad.length ? `<div class="mt-3 rounded-2xl bg-warm/15 p-3 text-[13px] font-bold text-warm">⚠️ Может содержать: ${bad.map((r) => `${r.e} ${r.name.toLowerCase()}`).join(', ')} — ты отметила это ограничение</div>` : ''}
+      <div class="mt-4 space-y-2.5">${bar('🥚 Белки', d.p, mg.p, 'rgb(var(--a500))')}${bar('🥑 Жиры', d.f, mg.f, 'rgb(var(--p500))')}${bar('🍞 Углеводы', d.c, mg.c, 'rgb(var(--warm))')}</div>
+      <div class="mt-4 flex flex-wrap gap-1.5">${d.micro.map((m) => `<span class="rounded-full px-2.5 py-1 text-[12px] font-bold ${currentPhase().focus.includes(m) ? 'cta' : 'bg-soft text-ink/75'}">${MICRO_E[m]} ${m}</span>`).join('')}</div>
+      <div class="mt-4 rounded-2xl p-4" style="background:${phc(currentPhaseKey(), .12)}">
+        <p class="text-[12px] font-extrabold uppercase tracking-wider" style="color:${phc(currentPhaseKey())}">✨ Под твой гормональный фон</p>
+        <p class="mt-2 text-[14px] leading-relaxed text-ink">${hormoneAdvice(d)}</p>
+      </div>
+      <div class="mt-5 grid grid-cols-2 gap-2">
+        <button data-action="scanAgain" class="rounded-2xl bg-soft py-3.5 text-[14px] font-extrabold text-ink">📸 Ещё фото</button>
+        <button data-action="addScanned" class="cta rounded-2xl py-3.5 text-[14px] font-extrabold">➕ В дневник</button>
+      </div>`;
+  },
+
+  /** 💬 Ветка вопроса */
+  thread() {
+    const q = state.questions.find((x) => x.id === ui.sheet.id);
+    if (!q) return '';
+    return `${sheetTitle(`<span class="rounded-full px-2.5 py-1 font-sans text-[12px] font-extrabold ${TAG_STYLE[q.tag]}">${TAG_E[q.tag]} ${q.tag}</span>`)}
+      <p class="font-display text-[20px] leading-snug text-ink">${esc(q.text)}</p>
+      <div class="mt-2 flex items-center gap-2">${anonAvatar('h-6 w-6 text-[12px]')}<span class="text-[12px] font-bold text-muted">Анонимно ·</span> ${levelBadge(q.authorLvl)}</div>
+      <div class="mt-5 space-y-3">
+        ${q.answers.length ? q.answers.map((a) => `
+          <div class="rounded-2xl bg-card p-4 shadow-glow">
+            <div class="flex items-center gap-2">
+              ${a.mine ? avatar((state.name || '🌷').charAt(0), 0, 'h-8 w-8 text-[12px]') : anonAvatar()}
+              <div class="leading-tight"><p class="text-[12.5px] font-extrabold text-ink">${a.mine ? 'Анонимно (это ты)' : 'Анонимная участница'}</p>${levelBadge(a.lvl)}</div>
+              <span class="ml-auto text-[11.5px] font-semibold text-muted">${a.time}</span>
+            </div>
+            <p class="mt-2.5 text-[14.5px] leading-relaxed text-ink">${esc(a.text)}</p>
+            <button data-action="likeAnswer" data-id="${a.id}" class="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-extrabold ${a.liked ? 'bg-prime-500/15 text-prime-700' : 'bg-soft text-muted'}">
+              <span class="emoji like-emoji">${a.liked ? '❤️' : '🤍'}</span>${a.likes} · Полезно</button>
+          </div>`).join('') : `<p class="rounded-2xl bg-soft/70 p-4 text-center text-[13.5px] font-semibold text-muted">💭 Ответов пока нет — поддержи первой 🤍</p>`}
+      </div>
+      <div class="sticky bottom-0 -mx-5 mt-4 px-5 pb-1 pt-3" style="background:linear-gradient(to top, rgb(var(--page)) 80%, transparent)">
+        <div class="flex items-end gap-2">
+          <textarea id="answer-input" rows="1" placeholder="Поделись опытом анонимно… 🕊️" class="max-h-28 min-h-[48px] flex-1 resize-none rounded-2xl bg-card px-4 py-3 text-[14.5px] text-ink shadow-glow outline-none placeholder:text-muted/70 focus:ring-2 focus:ring-accent-300"></textarea>
+          <button data-action="sendAnswer" class="cta flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-[18px] font-extrabold" aria-label="Отправить">↑</button>
+        </div>
+        <p class="mt-1.5 text-[11px] font-bold text-muted">✨ +5 XP за ответ · будь бережной к чужому опыту 🤍</p>
+      </div>`;
+  },
+
+  /** 🕊️ Анонимный вопрос */
+  ask() {
+    return `${sheetTitle('🕊️ Анонимный вопрос', 'Никто не увидит твоё имя — только уровень')}
+      <textarea id="ask-input" rows="5" maxlength="400" placeholder="Например: как облегчить боль внизу живота без таблеток? 🌙" class="w-full resize-none rounded-2xl bg-card p-4 text-[15px] leading-relaxed text-ink shadow-glow outline-none placeholder:text-muted/70 focus:ring-2 focus:ring-accent-300">${esc(ui.ask.draft || '')}</textarea>
+      <p class="mb-2 mt-4 text-[12px] font-extrabold uppercase tracking-wider text-muted">🏷️ Тема</p>
+      <div class="flex flex-wrap gap-2">${FORUM_TAGS.slice(1).map((t) => `
+        <button data-action="askTag" data-val="${t}" class="rounded-full px-4 py-2 text-[13px] font-bold ${ui.ask.tag === t ? 'cta' : 'bg-card text-muted shadow-glow'}"><span class="emoji">${TAG_E[t]}</span> ${t}</button>`).join('')}</div>
+      <div class="mt-4 flex items-center justify-between rounded-2xl bg-card p-4 shadow-glow">
+        <div class="flex items-center gap-3"><span class="emoji flex h-9 w-9 items-center justify-center rounded-xl bg-soft text-[17px]">🥷</span>
+          <div><p class="text-[14px] font-extrabold text-ink">Полная анонимность</p><p class="text-[12px] font-medium text-muted">Скрыть даже уровень и бейдж</p></div></div>
+        ${toggleSwitch(ui.ask.hideLevel, 'askHideLevel')}
+      </div>
+      <button data-action="submitAsk" class="cta mt-5 w-full rounded-2xl py-4 text-[15px] font-extrabold">📨 Опубликовать · +15 XP</button>`;
+  },
+
+  /** 📍 Чат гео-группы и участницы */
+  group() {
+    const g = state.groups.find((x) => x.id === ui.sheet.id);
+    if (!g) return '';
+    const view = ui.sheet.view || 'chat';
+    return `${sheetTitle(`${g.e} ${g.name}`, `📍 ${g.city} · 👭 ${fmt(g.members)} ${plural(g.members, ['участница', 'участницы', 'участниц'])}`)}
+      <div class="mb-4">${segmented([['chat', '💬 Чат'], ['people', '👭 Участницы']], view, 'groupView')}</div>
+      ${view === 'chat' ? `
+        <div class="space-y-2.5">${g.chat.map((m) => `
+          <div class="flex ${m.mine ? 'justify-end' : 'items-end gap-2'}">
+            ${m.mine ? '' : avatar(m.who.charAt(0), hash(m.who), 'h-8 w-8 text-[12px]')}
+            <div class="max-w-[78%] rounded-2xl px-3.5 py-2.5 ${m.mine ? 'cta rounded-br-md' : 'rounded-bl-md bg-card text-ink shadow-glow'}">
+              ${m.mine ? '' : `<p class="text-[11.5px] font-extrabold text-accent-700">${esc(m.who)}</p>`}
+              <p class="text-[14px] leading-snug">${esc(m.text)}</p>
+              <p class="mt-0.5 text-right text-[10.5px] font-semibold opacity-70">${m.t}</p></div>
+          </div>`).join('')}</div>
+        <div class="sticky bottom-0 -mx-5 mt-4 flex gap-2 px-5 pb-1 pt-3" style="background:linear-gradient(to top, rgb(var(--page)) 80%, transparent)">
+          <input id="chat-input" placeholder="Написать в группу… 💬" class="flex-1 rounded-2xl bg-card px-4 py-3 text-[14.5px] text-ink shadow-glow outline-none placeholder:text-muted/70 focus:ring-2 focus:ring-accent-300" />
+          <button data-action="sendGroupMsg" class="cta flex h-12 w-12 items-center justify-center rounded-2xl text-[18px] font-extrabold" aria-label="Отправить">↑</button>
+        </div>` : `
+        <ul class="divide-y divide-soft rounded-2xl bg-card shadow-glow">${[(state.name || 'Ты') + ' (ты)', ...g.people].map((p, i) => `
+          <li class="flex items-center gap-3 px-4 py-3">${avatar(p.charAt(0), i)}
+            <div class="flex-1"><p class="text-[14px] font-extrabold text-ink">${esc(p)}</p>${levelBadge(i === 0 ? levelOf(state.xp).lvl : (hash(p) % 5) + 1)}</div>
+            ${i === 1 ? '<span class="rounded-full bg-soft px-2.5 py-1 text-[11px] font-extrabold text-muted">👑 Админ</span>' : ''}</li>`).join('')}</ul>
+        <p class="mt-3 text-center text-[12px] font-bold text-muted">и ещё ${fmt(g.members - g.people.length - 1)} участниц 💞</p>`}`;
+  },
+
+  /** 📅 Запись в клинику / салон */
+  booking() {
+    const b = ui.booking;
+    const place = [...CLINICS, ...BEAUTY].find((p) => p.id === b.placeId);
+    const isClinic = CLINICS.includes(place);
+    const days = nextDays(7);
+    const times = ['09:00', '10:30', '12:00', '14:00', '15:30', '17:00', '18:30'];
+    return `${sheetTitle(`${place.e} ${place.name}`, `📍 ${place.area}`)}
+      <p class="mb-2 text-[12px] font-extrabold uppercase tracking-wider text-muted">${isClinic ? '👩‍⚕️ Специалист' : '💅 Услуга'}</p>
+      <div class="flex flex-wrap gap-2">${place.specs.map((s) => `
+        <button data-action="bookSpec" data-val="${s}" class="rounded-full px-4 py-2 text-[13px] font-bold ${b.spec === s ? 'cta' : 'bg-card text-ink shadow-glow'}">${s}</button>`).join('')}</div>
+
+      <p class="mb-2 mt-5 text-[12px] font-extrabold uppercase tracking-wider text-muted">🗓️ Дата</p>
+      <div class="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">${days.map((d, i) => `
+        <button data-action="bookDay" data-val="${i}" class="flex w-14 shrink-0 flex-col items-center rounded-2xl py-2.5 ${b.dayIdx === i ? 'cta' : 'bg-card text-ink shadow-glow'}">
+          <span class="text-[11px] font-extrabold uppercase opacity-70">${d.wd}</span><span class="text-[18px] font-extrabold">${d.num}</span></button>`).join('')}</div>
+
+      <p class="mb-2 mt-5 text-[12px] font-extrabold uppercase tracking-wider text-muted">🕐 Время</p>
+      <div class="grid grid-cols-4 gap-2">${times.map((t) => {
+        const busy = hash(place.id + b.dayIdx + t) % 3 === 0;
+        return `<button ${busy ? 'disabled' : `data-action="bookTime" data-val="${t}"`} class="rounded-xl py-2.5 text-[13.5px] font-extrabold ${busy ? 'cursor-not-allowed bg-soft/60 text-muted/40 line-through' : b.time === t ? 'cta' : 'bg-card text-ink shadow-glow'}">${t}</button>`;
+      }).join('')}</div>
+
+      <div class="mt-5 rounded-2xl bg-accent-50 p-4 text-[12.5px] font-bold leading-snug text-accent-700">
+        🔐 Запись приватна: в ${isClinic ? 'клинику' : 'салон'} передаются только имя и телефон. Бесплатная отмена за 12 часов.</div>
+      <button data-action="confirmBooking" class="mt-5 w-full rounded-2xl py-4 text-[15px] font-extrabold ${b.spec && b.time ? 'cta' : 'bg-line text-muted'}">
+        ${b.spec && b.time ? `✅ Подтвердить · ${days[b.dayIdx].label}, ${b.time}` : 'Выбери услугу и время'}</button>`;
+  },
+
+  /** 👑 Апгрейд до Premium */
+  upgrade() {
+    const perks = [
+      ['📸', 'AI-сканер по фото', 'БЖУ и совет под фазу за секунды'],
+      ['🛍️', 'Промокоды партнёров', 'До −25% на косметику, одежду и уход'],
+      ['📊', 'Глубокая аналитика цикла', 'Связь питания, настроения и фаз'],
+      ['🎁', 'Программа «3 + 1»', '4-й месяц — в подарок']
+    ];
+    return `${sheetTitle('👑 Sana Premium', 'Забота, которая подстраивается под тебя ✨')}
+      <div class="space-y-2.5">${perks.map(([e, t, s]) => `
+        <div class="flex items-center gap-3 rounded-2xl bg-card p-3.5 shadow-glow">
+          <span class="emoji flex h-11 w-11 items-center justify-center rounded-xl bg-accent-100 text-[22px]">${e}</span>
+          <div><p class="text-[14.5px] font-extrabold text-ink">${t}</p><p class="text-[12.5px] font-medium text-muted">${s}</p></div></div>`).join('')}</div>
+      <div class="hero mt-5 rounded-2xl p-5 shadow-lift">
+        <p class="font-display text-[28px]">${fmt(PRICE)} ₸ <span class="font-sans text-[14px] font-bold opacity-80">/ месяц</span></p>
+        <p class="text-[12.5px] font-semibold opacity-80">Отмена в любой момент · это демо, оплата не списывается</p>
+        <button data-action="activatePremium" class="shine mt-4 w-full rounded-2xl bg-white py-3.5 text-[15px] font-extrabold text-black">✨ Активировать Premium</button>
+      </div>`;
+  },
+
+  name() {
+    return `${sheetTitle('✏️ Как к тебе обращаться?', 'Имя видно только тебе — в ленте ты анонимна 🕊️')}
+      <input id="name-input" value="${esc(state.name)}" maxlength="24" class="w-full rounded-2xl bg-card px-4 py-4 text-[16px] font-extrabold text-ink shadow-glow outline-none focus:ring-2 focus:ring-accent-300" />
+      <button data-action="saveName" class="cta mt-4 w-full rounded-2xl py-4 text-[15px] font-extrabold">💾 Сохранить</button>`;
+  },
+
+  reset() {
+    return `${sheetTitle('🔄 Сбросить демо-данные?', 'Дневник, опрос, записи и прогресс вернутся к начальному состоянию')}
+      <div class="grid grid-cols-2 gap-2">
+        <button data-action="closeSheet" class="rounded-2xl bg-soft py-4 text-[15px] font-extrabold text-ink">Отмена</button>
+        <button data-action="resetDemo" class="rounded-2xl bg-warm py-4 text-[15px] font-extrabold text-white">Сбросить</button>
+      </div>`;
+  }
+};
+
+function nextDays(n) {
+  return Array.from({ length: n }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() + i + 1);
+    return { wd: d.toLocaleDateString('ru-RU', { weekday: 'short' }).replace('.', ''), num: d.getDate(), label: shortDate(d) };
+  });
+}
+
+function openSheet(type, data = {}) {
+  ui.sheet = { type, ...data };
+  renderSheet();
+  const el = $('#sheet');
+  el.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('open')));
+}
+function renderSheet() {
+  if (!ui.sheet) return;
+  $('#sheet-content').innerHTML = SHEETS[ui.sheet.type]();
+}
+function closeSheet() {
+  const el = $('#sheet');
+  el.classList.remove('open');
+  document.body.style.overflow = '';
+  clearTimeout(scanTimer);
+  setTimeout(() => { if (!el.classList.contains('open')) { el.classList.add('hidden'); ui.sheet = null; } }, 320);
+}
+
+
+/* ===================== 8. ДЕЙСТВИЯ (ОБРАБОТЧИКИ) ===================== */
+
+let scanTimer;
+function startScan(dish, img = null) {
+  ui.scan = { stage: 'scanning', dish, img };
+  renderSheet();
+  clearTimeout(scanTimer);
+  scanTimer = setTimeout(() => { ui.scan.stage = 'result'; renderSheet(); }, 2200);
+}
+
+function addMeal(meal) {
+  state.meals.unshift({ id: Date.now() + Math.random().toString(36).slice(2, 6), ...meal });
+  save();
+}
+
+/** Анимация «сердечка» после перерисовки */
+function popLike(selector) { const el = document.querySelector(selector); if (el) el.classList.add('pop'); }
+
+const findQuestion = (id) => state.questions.find((q) => q.id === id);
+const nowTime = () => new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+const ACTIONS = {
+  /* --- Навигация, темы, общее --- */
+  nav: (el) => { ui.tab = el.dataset.tab; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
+  openSheet: (el) => {
+    const type = el.dataset.sheet;
+    if (type === 'settings') {
+      // Черновик настроек живёт в ui.sheet, чтобы перерисовка не стирала введённое
+      return openSheet('settings', { day: cycleDay(), len: cycleLen(), tips: state.tipsEnabled, kcal: state.customCalories || '', base: state.baseCalories });
+    }
+    openSheet(type);
+  },
+  closeSheet: () => closeSheet(),
+  setTheme: (el) => {
+    applyTheme(el.dataset.val);
+    const t = THEMES.find((x) => x.id === el.dataset.val);
+    toast(`${t.e} Тема: ${t.name}`);
+    render(); renderSheet();
+  },
+  setPlan: (el) => setPlan(el.dataset.val),
+  activatePremium: () => { closeSheet(); setPlan('premium'); confetti(); },
+
+  /* --- Онбординг --- */
+  restartOnboarding: () => { closeSheet(); startOnboarding(); render(); window.scrollTo({ top: 0 }); },
+  obCancel: () => { ui.onboarding = false; ui.ob = null; render(); },
+  obBack: () => { ui.ob.step = Math.max(0, ui.ob.step - 1); render(); window.scrollTo({ top: 0 }); },
+  obNext: () => {
+    const d = ui.ob.data, step = ui.ob.step;
+    if (step === 0 && (!d.lastPeriod || d.lastPeriod > todayISO())) return toast('📅 Укажи дату начала последних месячных');
+    if (step === 1 && !d.goals.length) return toast('🎯 Выбери хотя бы одну цель');
+    ui.ob.step++; render(); window.scrollTo({ top: 0 });
+  },
+  obDate: (el) => { ui.ob.data.lastPeriod = daysAgoISO(+el.dataset.val); render(); },
+  obGoal: (el) => {
+    const id = el.dataset.val, g = ui.ob.data.goals;
+    if (g.includes(id)) ui.ob.data.goals = g.filter((x) => x !== id);
+    else {
+      // «Сбросить вес» и «Поддерживать форму» взаимоисключающие
+      const opposite = { lose: 'maintain', maintain: 'lose' }[id];
+      ui.ob.data.goals = [...g.filter((x) => x !== opposite), id];
+    }
+    render();
+  },
+  obRestr: (el) => {
+    const id = el.dataset.val, r = ui.ob.data.restrictions;
+    ui.ob.data.restrictions = r.includes(id) ? r.filter((x) => x !== id) : [...r, id];
+    render();
+  },
+  obRestrNone: () => { ui.ob.data.restrictions = []; render(); },
+  obActivity: (el) => { ui.ob.data.activity = el.dataset.val; render(); },
+  obFinish: () => {
+    const d = ui.ob.data;
+    if (!d.activity) return toast('🧘‍♀️ Выбери уровень активности');
+    state.name = (d.name || '').trim() || state.name || 'Подруга';
+    state.profile = { onboarded: true, lastPeriod: d.lastPeriod, cycleLength: d.cycleLength, goals: d.goals, restrictions: d.restrictions, activity: d.activity };
+    state.baseCalories = calcBase(state.profile);   // пересчёт нормы под ответы
+    state.customCalories = null;
+    ui.halalOnly = d.restrictions.includes('halal');
+    ui.onboarding = false; ui.ob = null; ui.tab = 'diary'; ui.tipIndex = 0;
+    ui.calc = { query: '', selectedId: null, grams: 150 };
+    save(); render(); window.scrollTo({ top: 0 });
+    confetti();
+    toast(`✨ Дневник настроен под тебя: ${fmt(calorieGoal())} ккал`);
+  },
+
+  /* --- Дневник --- */
+  setPhase: (el) => {
+    const seg = phaseSegments(cycleLen()).find((s) => s.key === el.dataset.val);
+    setCycleDay(seg.start); ui.tipIndex = 0; save();
+    toast(`${PHASES[seg.key].e} Фаза: ${PHASES[seg.key].name}`); render();
+  },
+  nextTip: () => {
+    ui.tipIndex++;
+    const tips = getTips();
+    const t = $('#tip-text');
+    if (t) { t.classList.remove('fade-in'); void t.offsetWidth; t.classList.add('fade-in'); t.textContent = tips[ui.tipIndex % tips.length]; }
+    const n = t && t.nextElementSibling; if (n) n.textContent = `💬 Совет ${ui.tipIndex % tips.length + 1} из ${tips.length} · подобран под фазу и цели`;
+  },
+  selectFood: (el) => { ui.calc.selectedId = +el.dataset.id; updateCalc(); },
+  setGrams: (el) => { ui.calc.grams = +el.dataset.val; const i = $('#food-grams'); if (i) i.value = ui.calc.grams; updateCalcNumbers(); },
+  addFood: () => {
+    const f = FOOD_DB.find((x) => x.id === ui.calc.selectedId);
+    const g = Math.max(1, Math.min(3000, +ui.calc.grams || 0));
+    if (!f) return;
+    const k = g / 100;
+    addMeal({ name: f.name, e: f.e, grams: g, kcal: f.kcal * k, p: f.p * k, f: f.f * k, c: f.c * k, micro: f.micro, source: 'manual' });
+    ui.calc = { query: '', selectedId: null, grams: 150 };
+    toast(`${f.e} ${f.name} · ${fmt(f.kcal * k)} ккал`);
+    render();
+  },
+  removeMeal: (el) => { state.meals = state.meals.filter((m) => String(m.id) !== el.dataset.id); save(); render(); },
+  clearMeals: () => { state.meals = []; save(); toast('🧹 Дневник за сегодня очищен'); render(); },
+  water: (el) => {
+    const n = +el.dataset.n;
+    state.water = state.water === n ? n - 1 : n; save();
+    if (state.water === currentPhase().water) toast('💧 Норма воды выполнена! Ты умница 🎉');
+    render();
+  },
+  toggleTips: () => { state.tipsEnabled = !state.tipsEnabled; save(); toast(state.tipsEnabled ? '✨ AI-советы включены' : '🔕 AI-советы выключены'); render(); },
+
+  /* --- Ручные настройки --- */
+  sheetPhase: (el) => { ui.sheet.day = phaseSegments(ui.sheet.len).find((s) => s.key === el.dataset.val).start; renderSheet(); },
+  sheetTips: () => { ui.sheet.tips = !ui.sheet.tips; renderSheet(); },
+  resetCalories: () => { ui.sheet.kcal = ''; const i = $('#set-kcal'); if (i) i.value = ''; toast('🤖 Норма снова считается автоматически'); },
+  saveSettings: () => {
+    const kcal = parseInt(ui.sheet.kcal, 10);
+    const base = parseInt(ui.sheet.base, 10);
+    state.profile.cycleLength = ui.sheet.len;
+    setCycleDay(Math.min(ui.sheet.day, ui.sheet.len));
+    state.customCalories = kcal >= 1000 && kcal <= 4500 ? kcal : null;
+    if (base >= 1000 && base <= 4000) state.baseCalories = base;
+    state.tipsEnabled = ui.sheet.tips;
+    save(); closeSheet(); toast('💾 Настройки сохранены'); render();
+  },
+
+  /* --- AI-сканер --- */
+  openScanner: () => { ui.scan = { stage: 'pick', img: null, dish: null }; openSheet('scanner'); },
+  scanDemo: (el) => startScan(SCAN_DISHES.find((d) => d.id === el.dataset.id)),
+  scanAgain: () => { ui.scan = { stage: 'pick', img: null, dish: null }; renderSheet(); },
+  addScanned: () => {
+    const d = ui.scan.dish;
+    addMeal({ name: d.name, e: d.e, grams: d.grams, kcal: d.kcal, p: d.p, f: d.f, c: d.c, micro: d.micro, source: 'ai' });
+    closeSheet(); toast(`${d.e} ${d.name} добавлено`); render();
+  },
+
+  /* --- Форум --- */
+  communityView: (el) => { ui.communityView = el.dataset.val; render(); },
+  forumTag: (el) => { ui.forumTag = el.dataset.val; render(); },
+  likeQuestion: (el) => {
+    const q = findQuestion(el.dataset.id);
+    q.liked = !q.liked; q.likes += q.liked ? 1 : -1; save(); render();
+    popLike(`#view [data-action="likeQuestion"][data-id="${q.id}"] .like-emoji`);
+  },
+  openThread: (el) => openSheet('thread', { id: el.dataset.id }),
+  likeAnswer: (el) => {
+    const a = findQuestion(ui.sheet.id).answers.find((x) => x.id === el.dataset.id);
+    a.liked = !a.liked; a.likes += a.liked ? 1 : -1; save(); renderSheet(); render();
+    popLike(`#sheet [data-action="likeAnswer"][data-id="${a.id}"] .like-emoji`);
+  },
+  sendAnswer: () => {
+    const text = $('#answer-input').value.trim();
+    if (text.length < 2) return toast('✍️ Напиши хотя бы пару слов');
+    findQuestion(ui.sheet.id).answers.push({ id: 'a' + Date.now(), lvl: levelOf(state.xp).lvl, text, likes: 0, liked: false, time: 'сейчас', mine: true });
+    state.myAnswers++; addXp(5); save();
+    renderSheet(); render(); toast('💬 Ответ опубликован · +5 XP');
+  },
+  askTag: (el) => { ui.ask.draft = $('#ask-input').value; ui.ask.tag = el.dataset.val; renderSheet(); },
+  askHideLevel: () => { ui.ask.draft = $('#ask-input').value; ui.ask.hideLevel = !ui.ask.hideLevel; renderSheet(); },
+  submitAsk: () => {
+    const text = $('#ask-input').value.trim();
+    if (text.length < 10) return toast('✍️ Опиши вопрос чуть подробнее');
+    state.questions.unshift({ id: 'q' + Date.now(), tag: ui.ask.tag, time: 'только что', authorLvl: ui.ask.hideLevel ? 1 : levelOf(state.xp).lvl, likes: 0, liked: false, text, answers: [], mine: true });
+    state.myQuestions++; addXp(15); save();
+    ui.ask.draft = ''; ui.forumTag = 'Все'; ui.communityView = 'qa';
+    closeSheet(); render(); toast('🕊️ Вопрос опубликован анонимно · +15 XP');
+  },
+
+  /* --- Гео-группы --- */
+  groupCity: (el) => { ui.groupCity = el.dataset.val; render(); },
+  joinGroup: (el) => {
+    const g = state.groups.find((x) => x.id === el.dataset.id);
+    g.joined = !g.joined; g.members += g.joined ? 1 : -1; save(); render();
+    if (g.joined) { toast(`${g.e} Добро пожаловать в «${g.name}»!`); openSheet('group', { id: g.id, view: 'chat' }); }
+    else toast(`👋 Ты вышла из «${g.name}»`);
+  },
+  openGroup: (el) => openSheet('group', { id: el.dataset.id, view: 'chat' }),
+  groupView: (el) => { ui.sheet.view = el.dataset.val; renderSheet(); },
+  sendGroupMsg: () => {
+    const input = $('#chat-input');
+    const text = input && input.value.trim();
+    if (!text) return;
+    const g = state.groups.find((x) => x.id === ui.sheet.id);
+    g.chat.push({ who: state.name || 'Ты', text, t: nowTime(), mine: true });
+    save(); renderSheet();
+    const again = $('#chat-input'); if (again) again.focus();
+    // Имитация ответа участницы
+    setTimeout(() => {
+      const who = g.people[Math.floor(Math.random() * g.people.length)];
+      const replies = ['Поддерживаю! 🤍', 'Отличная идея, я в деле 🙌', 'Спасибо, что написала! 💞', 'Давайте договоримся в выходные ☕', 'Ура, новенькая! Добро пожаловать 🎉'];
+      g.chat.push({ who, text: replies[Math.floor(Math.random() * replies.length)], t: nowTime() });
+      save();
+      if (ui.sheet && ui.sheet.type === 'group' && ui.sheet.id === g.id && (ui.sheet.view || 'chat') === 'chat') renderSheet();
+    }, 1400);
+  },
+
+  /* --- Партнёры --- */
+  partnersView: (el) => { ui.partnersView = el.dataset.val; render(); },
+  toggleHalal: () => { ui.halalOnly = !ui.halalOnly; render(); },
+  openBooking: (el) => { ui.booking = { placeId: el.dataset.id, spec: null, dayIdx: 0, time: null }; openSheet('booking'); },
+  bookSpec: (el) => { ui.booking.spec = el.dataset.val; renderSheet(); },
+  bookDay: (el) => { ui.booking.dayIdx = +el.dataset.val; ui.booking.time = null; renderSheet(); },
+  bookTime: (el) => { ui.booking.time = el.dataset.val; renderSheet(); },
+  confirmBooking: () => {
+    const b = ui.booking;
+    if (!b.spec || !b.time) return toast('👆 Выбери услугу и время');
+    const place = [...CLINICS, ...BEAUTY].find((p) => p.id === b.placeId);
+    const day = nextDays(7)[b.dayIdx];
+    state.bookings.push({ id: 'bk' + Date.now(), placeId: place.id, e: place.e, title: place.name, spec: b.spec, dateLabel: day.label, time: b.time });
+    save(); closeSheet(); render(); toast(`✅ Запись: ${day.label}, ${b.time}`);
+  },
+  cancelBooking: (el) => { state.bookings = state.bookings.filter((b) => b.id !== el.dataset.id); save(); render(); toast('🗑️ Запись отменена'); },
+  copyCode: (el) => {
+    const code = el.dataset.code;
+    const done = () => toast(`📋 Промокод ${code} скопирован`);
+    try { navigator.clipboard.writeText(code).then(done, done); } catch (e) { done(); }
+  },
+
+  /* --- Профиль и лояльность --- */
+  payMonth: () => {
+    state.loyalty.paid = Math.min(3, state.loyalty.paid + 1);
+    state.plan = 'premium'; save(); render();
+    if (state.loyalty.paid === 3) { toast('🎉 3 месяца подряд! Подарок открыт'); confetti(); }
+    else toast(`💳 Месяц ${state.loyalty.paid} оплачен (демо)`);
+  },
+  claimGift: () => { state.loyalty.claimed = true; state.plan = 'premium'; save(); render(); confetti(); toast('🎁 Бесплатный месяц активирован'); },
+  newLoyaltyCycle: () => { state.loyalty = { paid: 0, claimed: false }; save(); render(); toast('🔁 Новый круг 3 + 1 начат'); },
+  saveName: () => {
+    const v = $('#name-input').value.trim();
+    if (!v) return toast('✍️ Имя не может быть пустым');
+    state.name = v; save(); closeSheet(); render(); toast(`🤍 Приятно познакомиться, ${v}!`);
+  },
+  toggleNotif: () => { state.notifications = !state.notifications; save(); render(); toast(state.notifications ? '🔔 Напоминания включены' : '🔕 Напоминания выключены'); },
+  privacy: () => toast('🔒 Данные хранятся только на этом устройстве'),
+  resetDemo: () => {
+    const theme = state.theme;
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    Object.assign(state, defaultState(), { theme });
+    save();
+    ui.tab = 'diary'; ui.ob = null; ui.onboarding = true;
+    closeSheet(); render(); toast('🔄 Демо-данные сброшены');
+  }
+};
+
+/* ---------- Делегирование событий ---------- */
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-action]');
+  if (!el || el.disabled) return;
+  const fn = ACTIONS[el.dataset.action];
+  if (fn) { e.preventDefault(); fn(el, e); }
+});
+
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  // Онбординг
+  if (t.id === 'ob-name') ui.ob.data.name = t.value;
+  if (t.id === 'ob-date') { ui.ob.data.lastPeriod = t.value; $('#ob-preview').innerHTML = obPreview(); }
+  if (t.id === 'ob-len') {
+    ui.ob.data.cycleLength = +t.value;
+    $('#ob-len-label').textContent = t.value;
+    $('#ob-preview').innerHTML = obPreview();
+  }
+  // Калькулятор
+  if (t.id === 'food-search') { ui.calc.query = t.value; ui.calc.selectedId = null; updateCalc(); }
+  if (t.id === 'food-grams') { ui.calc.grams = +t.value; updateCalcNumbers(); }
+  // Ручные настройки
+  if (t.id === 'set-day') {
+    ui.sheet.day = +t.value;
+    const k = phaseKeyForDay(ui.sheet.day, ui.sheet.len);
+    $('#set-day-label').textContent = ui.sheet.day;
+    $('#set-phase-label').textContent = `${PHASES[k].e} ${PHASES[k].name}`;
+    $('#set-phase-wrap').style.color = phc(k);
+  }
+  if (t.id === 'set-kcal') ui.sheet.kcal = t.value;
+  if (t.id === 'set-base') ui.sheet.base = t.value;
+  if (t.id === 'set-len') { ui.sheet.len = +t.value; ui.sheet.day = Math.min(ui.sheet.day, ui.sheet.len); renderSheet(); }
+  if (t.id === 'answer-input') { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 112) + 'px'; }
+});
+
+/* Загрузка фото в AI-сканер: выбираем блюдо, подходящее под ограничения */
+document.addEventListener('change', (e) => {
+  if (e.target.id !== 'scan-file' || !e.target.files[0]) return;
+  const ok = SCAN_DISHES.filter((d) => !conflictsOf(d).length);
+  const pool = ok.length ? ok : SCAN_DISHES;
+  const reader = new FileReader();
+  reader.onload = () => startScan(pool[Math.floor(Math.random() * pool.length)], reader.result);
+  reader.readAsDataURL(e.target.files[0]);
+});
+
+/* Enter — отправка, Escape — закрыть лист */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && ui.sheet) closeSheet();
+  if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.target.id === 'chat-input') { e.preventDefault(); ACTIONS.sendGroupMsg(); }
+    if (e.target.id === 'answer-input') { e.preventDefault(); ACTIONS.sendAnswer(); }
+    if (e.target.id === 'name-input') { e.preventDefault(); ACTIONS.saveName(); }
+  }
+});
+
+/* ---------- Старт ---------- */
+applyTheme(state.theme, false);
+render();
+</script>
+</body>
+</html>
